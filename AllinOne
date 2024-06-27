@@ -1,0 +1,505 @@
+Version 1
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <style>
+    .question { display: none; }
+    .question.active { display: block;}
+    .btn-new {
+      margin: 5px 5px 5px 5px;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      text-decoration: none;
+      color: white;
+      background: #0B63F6;
+      box-shadow: 0 5px 0 #003CC5;
+    }
+
+    .btn-new:hover {
+      background: #003CC5;
+      box-shadow: none;
+      position: relative;
+      top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id='survey'>
+    <div id="question1" class="question active">
+      <p><b>Вопрос 1: Получаете ли Вы какие-либо навыки или знания в данный момент?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Да, это непрерывный процесс.')">Да, это непрерывный процесс.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Нет, делаю это по необходимости.')">Нет, делаю это по необходимости.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Нет, я обладаю всеми необходимыми навыками.')">Нет, я обладаю всеми необходимыми навыками.</button>
+    </div>
+    <div id="question2" class="question">
+      <p><b>Вопрос 2: Есть ли у Вас профессиональные достижения, значимые для Вас?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Да, в течение последнего года.')">Да, в течение последнего года.</button>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Да, это было несколько лет назад.')">Да, это было несколько лет назад.</button>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Личных нет, но я горжусь тем, что участвую в достижении общего результата.')">Личных нет, но я горжусь тем, что участвую в достижении общего результата.</button>
+    </div>
+    <div id="question3" class="question">
+      <p><b>Вопрос 3: Закончите фразу: «Конструктивная критика Вашей работы…»</b></p>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Может снизить мотивацию.')">Может снизить мотивацию.</button>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Позволяет сделать выводы и извлечь пользу.')">Позволяет сделать выводы и извлечь пользу.</button>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Остаётся для меня незамеченной и никак не отражается на моей работе.')">Остаётся для меня незамеченной и никак не отражается на моей работе.</button>
+    </div>
+    <div id="question4" class="question">
+      <p><b>Вопрос 4: Как Вы реагируете на неожиданные изменения в работе?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я подстраиваюсь под ситуацию, перемены не вызывают у меня проблем.')">Я подстраиваюсь под ситуацию, перемены не вызывают у меня проблем.</button>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я подстраиваюсь под ситуацию, но мне нужно время, чтобы адаптироваться и выстроить свою работу по-другому.')">Я подстраиваюсь под ситуацию, но мне нужно время, чтобы адаптироваться и выстроить свою работу по-другому.</button>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я выполняю эту работу, но считаю это неправильным. Работа должна быть плановой.')">Я выполняю эту работу, но считаю это неправильным. Работа должна быть плановой.</button>
+    </div>
+    <div id="question5" class="question">
+      <p><b>Вопрос 5: Имели ли Вы опыт наставничества или обмена опытом с коллегами?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Да, мы регулярно обменивались опытом с коллегами.')">Да, мы регулярно обменивались опытом с коллегами.</button>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Да, это происходило при необходимости выполнить какую-либо новую задачу.')">Да, это происходило при необходимости выполнить какую-либо новую задачу.</button>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Нет, предпочитаю работать самостоятельно.')">Нет, предпочитаю работать самостоятельно.</button>
+    </div>
+    <div id="question6" class="question">
+      <p><b>Вопрос 6: Чувствуете ли Вы свою ответственность за достижение коллективного результата?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Да, чувствую.')">Да, чувствую.</button>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Да, но с пониманием того, что у каждого своя зона ответственности. Кто-то сработал хуже, кто-то лучше.')">Да, но с пониманием того, что у каждого своя зона ответственности. Кто-то сработал хуже, кто-то лучше.</button>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Каждый несёт ответственность за свою часть работы.')">Каждый несёт ответственность за свою часть работы.</button>
+    </div>
+    <div id="question7" class="question">
+      <p><b>Вопрос 7: Как Вы относитесь к временным неудачам, возникшим при достижении целей?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Отношусь к неудачам достаточно легко, не придаю им значения.')">Отношусь к неудачам достаточно легко, не придаю им значения.</button>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Считаю, что это возможность получить новый опыт.')">Считаю, что это возможность получить новый опыт.</button>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Я переживаю по этому поводу. Мне требуется поддержка со стороны коллег.')">Я переживаю по этому поводу. Мне требуется поддержка со стороны коллег.</button>
+    </div>
+    <div id="question8" class="question">
+      <p><b>Вопрос 8: Что Вы можете сказать о своей работе в команде?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Мне нравится работать в команде, при этом могу решать какие-то задачи самостоятельно.')">Мне нравится работать в команде, при этом могу решать какие-то задачи самостоятельно.</button>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Предпочитаю работать один, но для решения каких-то задач готов работать в команде.')">Предпочитаю работать один, но для решения каких-то задач готов работать в команде.</button>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Для меня это непринципиально.')">Для меня это непринципиально.</button>
+    </div>
+    <div id="question9" class="question">
+      <p><b>Вопрос 9: Как Вы относитесь к своей ответственности за достижение целей?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'Только от меня зависит, достигну я своей цели или нет.')">Только от меня зависит, достигну я своей цели или нет.</button>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'От того, как я буду выстраивать свою работу, зависит, достигну я цели или нет.')">От того, как я буду выстраивать свою работу, зависит, достигну я цели или нет.</button>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'Всё зависит от стечения обстоятельств.')">Всё зависит от стечения обстоятельств.</button>
+    </div>
+    <div id="question10" class="question">
+      <p><b>Вопрос 10: Можете ли Вы самостоятельно принять решение в стрессовой ситуации?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Да, могу.')">Да, могу.</button>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Могу, но потом очень долго переживаю.')">Могу, но потом очень долго переживаю.</button>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Нет, мне нужно посоветоваться.')">Нет, мне нужно посоветоваться.</button>
+    </div>
+    <div id="end" class="question">
+      <p>Спасибо за прохождение опроса!</p>
+    </div>
+  </div>
+
+  <script>
+    var surveyData = {};
+    function nextQuestion(current, next, answer) {
+      // Collect answer
+      surveyData[current] = answer;
+
+      // Hide current question
+      document.getElementById(current).classList.remove('active');
+      // Show next question
+      document.getElementById(next).classList.add('active');
+
+      // Send survey data to bot at the end
+      if (next === 'end') {
+        frameCommunicationSend(surveyData);
+      }
+    }
+
+    function frameCommunicationSend(data) {
+      // Assuming there's a frame named 'mainframe' where you want to send the data
+      var frame = parent.document.getElementById('mainframe');
+      if (frame) {
+        frame.contentWindow.postMessage(data, '*');
+      }
+    }
+
+    // Listen for messages from the bot
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'bot') {
+        // Handle bot messages if needed
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+Version 2
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <style>
+    .question { display: none; }
+    .question.active { display: block;}
+    .btn-new {
+      margin: 5px 5px 5px 5px;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      text-decoration: none;
+      color: white;
+      background: #0B63F6;
+      box-shadow: 0 5px 0 #003CC5;
+    }
+
+    .btn-new:hover {
+      background: #003CC5;
+      box-shadow: none;
+      position: relative;
+      top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id='survey'>
+    <div id="question1" class="question active">
+      <p><b>Вопрос 1: Получаете ли Вы какие-либо навыки или знания в данный момент?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Да, это непрерывный процесс.')">Да, это непрерывный процесс.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Нет, делаю это по необходимости.')">Нет, делаю это по необходимости.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Нет, я обладаю всеми необходимыми навыками.')">Нет, я обладаю всеми необходимыми навыками.</button>
+    </div>
+    <div id="question2" class="question">
+      <p><b>Вопрос 2: Есть ли у Вас профессиональные достижения, значимые для Вас?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Да, в течение последнего года.')">Да, в течение последнего года.</button>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Да, это было несколько лет назад.')">Да, это было несколько лет назад.</button>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Личных нет, но я горжусь тем, что участвую в достижении общего результата.')">Личных нет, но я горжусь тем, что участвую в достижении общего результата.</button>
+    </div>
+    <div id="question3" class="question">
+      <p><b>Вопрос 3: Закончите фразу: «Конструктивная критика Вашей работы…»</b></p>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Может снизить мотивацию.')">Может снизить мотивацию.</button>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Позволяет сделать выводы и извлечь пользу.')">Позволяет сделать выводы и извлечь пользу.</button>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Остаётся для меня незамеченной и никак не отражается на моей работе.')">Остаётся для меня незамеченной и никак не отражается на моей работе.</button>
+    </div>
+    <div id="question4" class="question">
+      <p><b>Вопрос 4: Как Вы реагируете на неожиданные изменения в работе?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я подстраиваюсь под ситуацию, перемены не вызывают у меня проблем.')">Я подстраиваюсь под ситуацию, перемены не вызывают у меня проблем.</button>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я подстраиваюсь под ситуацию, но мне нужно время, чтобы адаптироваться и выстроить свою работу по-другому.')">Я подстраиваюсь под ситуацию, но мне нужно время, чтобы адаптироваться и выстроить свою работу по-другому.</button>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я выполняю эту работу, но считаю это неправильным. Работа должна быть плановой.')">Я выполняю эту работу, но считаю это неправильным. Работа должна быть плановой.</button>
+    </div>
+    <div id="question5" class="question">
+      <p><b>Вопрос 5: Имели ли Вы опыт наставничества или обмена опытом с коллегами?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Да, мы регулярно обменивались опытом с коллегами.')">Да, мы регулярно обменивались опытом с коллегами.</button>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Да, это происходило при необходимости выполнить какую-либо новую задачу.')">Да, это происходило при необходимости выполнить какую-либо новую задачу.</button>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Нет, предпочитаю работать самостоятельно.')">Нет, предпочитаю работать самостоятельно.</button>
+    </div>
+    <div id="question6" class="question">
+      <p><b>Вопрос 6: Чувствуете ли Вы свою ответственность за достижение коллективного результата?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Да, чувствую.')">Да, чувствую.</button>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Да, но с пониманием того, что у каждого своя зона ответственности. Кто-то сработал хуже, кто-то лучше.')">Да, но с пониманием того, что у каждого своя зона ответственности. Кто-то сработал хуже, кто-то лучше.</button>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Каждый несёт ответственность за свою часть работы.')">Каждый несёт ответственность за свою часть работы.</button>
+    </div>
+    <div id="question7" class="question">
+      <p><b>Вопрос 7: Как Вы относитесь к временным неудачам, возникшим при достижении целей?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Отношусь к неудачам достаточно легко, не придаю им значения.')">Отношусь к неудачам достаточно легко, не придаю им значения.</button>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Считаю, что это возможность получить новый опыт.')">Считаю, что это возможность получить новый опыт.</button>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Я переживаю по этому поводу. Мне требуется поддержка со стороны коллег.')">Я переживаю по этому поводу. Мне требуется поддержка со стороны коллег.</button>
+    </div>
+    <div id="question8" class="question">
+      <p><b>Вопрос 8: Что Вы можете сказать о своей работе в команде?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Мне нравится работать в команде, при этом могу решать какие-то задачи самостоятельно.')">Мне нравится работать в команде, при этом могу решать какие-то задачи самостоятельно.</button>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Предпочитаю работать один, но для решения каких-то задач готов работать в команде.')">Предпочитаю работать один, но для решения каких-то задач готов работать в команде.</button>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Для меня это непринципиально.')">Для меня это непринципиально.</button>
+    </div>
+    <div id="question9" class="question">
+      <p><b>Вопрос 9: Как Вы относитесь к своей ответственности за достижение целей?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'Только от меня зависит, достигну я своей цели или нет.')">Только от меня зависит, достигну я своей цели или нет.</button>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'От того, как я буду выстраивать свою работу, зависит, достигну я цели или нет.')">От того, как я буду выстраивать свою работу, зависит, достигну я цели или нет.</button>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'Всё зависит от стечения обстоятельств.')">Всё зависит от стечения обстоятельств.</button>
+    </div>
+    <div id="question10" class="question">
+      <p><b>Вопрос 10: Можете ли Вы самостоятельно принять решение в стрессовой ситуации?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Да, могу.')">Да, могу.</button>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Могу, но потом очень долго переживаю.')">Могу, но потом очень долго переживаю.</button>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Нет, мне нужно посоветоваться.')">Нет, мне нужно посоветоваться.</button>
+    </div>
+    <div id="end" class="question">
+      <p>Спасибо за прохождение опроса!</p>
+    </div>
+  </div>
+
+  <script>
+    var surveyData = {};
+    function nextQuestion(current, next, answer) {
+      // Collect answer
+      surveyData[current] = answer;
+
+      // Hide current question
+      document.getElementById(current).classList.remove('active');
+      // Show next question
+      document.getElementById(next).classList.add('active');
+
+      // Send survey data to bot at the end
+      if (next === 'end') {
+        frameCommunicationSend(surveyData);
+      }
+    }
+
+    function frameCommunicationSend(data) {
+      // Assuming there's a frame named 'mainframe' where you want to send the data
+      var frame = parent.document.getElementById('mainframe');
+      if (frame) {
+        frame.contentWindow.postMessage(data, '*');
+      }
+    }
+
+    // Listen for messages from the bot
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'bot') {
+        // Handle bot messages if needed
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+Version 3
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <style>
+    .question { display: none; }
+    .question.active { display: block;}
+    .btn-new {
+      margin: 5px 5px 5px 5px;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      text-decoration: none;
+      color: white;
+      background: #0B63F6;
+      box-shadow: 0 5px 0 #003CC5;
+    }
+
+    .btn-new:hover {
+      background: #003CC5;
+      box-shadow: none;
+      position: relative;
+      top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id='survey'>
+    <div id="question1" class="question active">
+      <p><b>Вопрос 1: Получаете ли Вы какие-либо навыки или знания в данный момент?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Да, это непрерывный процесс.')">Да, это непрерывный процесс.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Нет, делаю это по необходимости.')">Нет, делаю это по необходимости.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Нет, я обладаю всеми необходимыми навыками.')">Нет, я обладаю всеми необходимыми навыками.</button>
+    </div>
+    <!-- Добавляем остальные вопросы аналогично -->
+
+    <div id="end" class="question">
+      <p>Спасибо за прохождение опроса!</p>
+    </div>
+  </div>
+
+  <script>
+    var surveyData = {};
+    function nextQuestion(current, next, answer) {
+      surveyData[current] = answer;
+      document.getElementById(current).classList.remove('active');
+      document.getElementById(next).classList.add('active');
+      if (next === 'end') {
+        frameCommunicationSend(surveyData);
+      }
+    }
+
+    function frameCommunicationSend(data) {
+      var frame = parent.document.getElementById('mainframe');
+      if (frame) {
+        frame.contentWindow.postMessage({ type: 'surveyData', data: data }, '*');
+      }
+    }
+
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'bot') {
+        // Handle bot messages if needed
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
+if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
+    if (!isset($_REQUEST['auth']['application_token'])) {
+        return false;
+    }
+
+    $msg = strtolower($_REQUEST['data']['PARAMS']['MESSAGE']);
+
+    main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+} else if ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
+    if (!isset($_REQUEST['auth']['application_token'])) {
+        return false;
+    }
+
+    foreach ($_REQUEST['data']['COMMAND'] as $command) {
+        switch ($command['COMMAND']) {
+            default:
+                break;
+        }
+    }
+} else if ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
+    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
+        return false;
+    }
+    main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+} else if ($_REQUEST['event'] == 'ONIMBOTDELETE') {
+    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
+        return false;
+    }
+    unset($appsConfig[$_REQUEST['auth']['application_token']]);
+    saveParams($appsConfig);
+} else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
+    // Installation event handling
+    $handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'], array(80, 443)) ? '' : ':' . $_SERVER['SERVER_PORT']) . $_SERVER['SCRIPT_NAME'];
+
+    $result = restCommand('imbot.register', array(
+        'CODE' => 'ValidatorBot',
+        'TYPE' => 'B',
+        'EVENT_MESSAGE_ADD' => $handlerBackUrl,
+        'EVENT_JOIN_CHAT' => $handlerBackUrl,
+        'EVENT_WELCOME_MESSAGE' => $handlerBackUrl,
+        'EVENT_BOT_DELETE' => $handlerBackUrl,
+        'PROPERTIES' => array(
+            'NAME' => 'Валидатор БОТ',
+            'LAST_NAME' => '',
+            'COLOR' => 'AQUA',
+            'EMAIL' => 'validatorno@mail.com',
+            'PERSONAL_BIRTHDAY' => '2016-03-23',
+            'WORK_POSITION' => 'Бот',
+            'PERSONAL_GENDER' => 'M',
+        ),
+    ), $_REQUEST["auth"]);
+
+    $botId = $result['result'];
+
+    $result = restCommand('imbot.app.update', array(
+        'APP_ID' => 4,
+        'FIELDS' => array(
+            'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php'
+        ),
+    ), $_REQUEST["auth"]);
+
+    $appsConfig[$_REQUEST['auth']['application_token']] = array(
+        'BOT_ID' => $botId,
+        'LANGUAGE_ID' => $_REQUEST['data']['LANGUAGE_ID'],
+        'AUTH' => $_REQUEST['auth'],
+    );
+    saveParams($appsConfig);
+} else if ($_REQUEST['event'] == 'ONSURVEYDATA') {
+    // Новый обработчик события данных опроса
+    if (!isset($_REQUEST['auth']['application_token'])) {
+        return false;
+    }
+
+    $surveyData = $_REQUEST['data']['SURVEY'];
+    $userId = $_REQUEST['data']['USER_ID'];
+    
+    // Логика обработки данных опроса
+    processSurveyData($userId, $surveyData);
+}
+
+function processSurveyData($userId, $surveyData) {
+    $message = "Спасибо за прохождение опроса! Ваши ответы:\n";
+    foreach ($surveyData as $question => $answer) {
+        $message .= "$question: $answer\n";
+    }
+
+    $result = restCommand('imbot.message.add', array(
+        "DIALOG_ID" => $userId,
+        "MESSAGE" => $message,
+    ), $_REQUEST["auth"]);
+    return $result;
+}
+
+function saveParams($params) {
+    $config = "<?php\n";
+    $config .= "\$appsConfig = " . var_export($params, true) . ";\n";
+    $config .= "?>";
+    $configFileName = '/config_' . trim(str_replace('.', '_', $_REQUEST['auth']['domain'])) . '.php';
+    file_put_contents(__DIR__ . $configFileName, $config);
+    return true;
+}
+
+function restCommand($method, array $params = array(), array $auth = array()) {
+    $queryUrl = 'https://' . $auth['domain'] . '/rest/' . $method;
+    $queryData = http_build_query(array_merge($params, array('auth' => $auth['access_token'])));
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_POST => 1,
+        CURLOPT_HEADER => 0,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_URL => $queryUrl,
+        CURLOPT_POSTFIELDS => $queryData,
+    ));
+    $result = curl_exec($curl);
+    curl_close($curl);
+    $result = json_decode($result, 1);
+    return $result;
+}
+
+function writeToLog($data, $title = '') {
+    $log = "\n------------------------\n";
+    $log .= date("Y.m.d G:i:s") . "\n";
+    $log .= (strlen($title) > 0 ? $title : 'DEBUG') . "\n";
+    $log .= print_r($data, 1);
+    $log .= "\n------------------------\n";
+    file_put_contents(__DIR__ . '/iframe.log', $log, FILE_APPEND);
+    return true;
+}
+
+function main_menu($user, $bot_id = 0, $message_id = 0, $app_id = 4) {
+    $arKeyboard = array();
+    $arKeyboard[] = array(
+        "TEXT" => "Начать опрос",
+        "BLOCK" => "Y",
+        "APP_ID" => $app_id,
+        "BG_COLOR" => "#D7FAF9",
+        "TEXT_COLOR" => "#000000",
+    );
+
+    $message = "[B]Уважаемый коллега! Мы очень рады, что Вы становитесь частью большого коллектива АО «РЕШЕТНЁВ»![/B][BR]Предлагаем Вам ответить на несколько вопросов анкеты. Это поможет нам улучшить обстановку в коллективе, сделать её комфортнее и благоприятнее. Ваше мнение очень важно для нас!
+";
+
+    $result = restCommand('imbot.message.add', array(
+        "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+        "MESSAGE" => $message,
+        "KEYBOARD" => $arKeyboard,
+    ), $_REQUEST["auth"]);
+    return $result;
+}
+
+function back($user, $bot_id, $message_id, $params) {
+    include 'db.php';
+    switch ($params) {
+        default:
+            $arResult = main_menu($user, $bot_id, $message_id);
+            break;
+    }
+}
