@@ -9,62 +9,42 @@ $configFileName = '/config_' . trim(str_replace('.', '_', $_REQUEST['auth']['dom
 if (file_exists(__DIR__ . $configFileName)) {
     include_once __DIR__ . $configFileName;
 }
-// receive event "new message for bot"
-if ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
-  if (!isset($_REQUEST['auth']['application_token'])) {
-      return false;
+
+function isValidRequest($auth) {
+  return isset($auth['application_token']);
+}
+$event = $_REQUEST['event'];
+$auth = $_REQUEST['auth'];
+$params = $_REQUEST['data']['PARAMS'];
+
+if ($event == 'ONIMBOTJOINCHAT' || $event == 'ONIMBOTMESSAGEADD' || $event == 'ONIMCOMMANDADD') {
+  if (!isValidRequest($auth)) {
+    return false;
   }
 
-  $msg = strtolower($_REQUEST['data']['PARAMS']['MESSAGE']);
-
-  main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
-}
-if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
-
-#    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
-#     file_put_contents($file, 'NO');
-    if (!isset($_REQUEST['auth']['application_token'])) {
-        return false;
-    }
-
-    $msg = strtolower($_REQUEST['data']['PARAMS']['MESSAGE']);
-
-    main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
-} else if ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
-    if (!isset($_REQUEST['auth']['application_token'])) {
-        return false;
-    }
-
-    foreach ($_REQUEST['data']['COMMAND'] as $command) {
+  if ($event == 'ONIMBOTJOINCHAT') {
+      main_menu($params['FROM_USER_ID']);
+  } elseif ($event == 'ONIMBOTMESSAGEADD') {
+      $msg = strtolower($params['MESSAGE']);
+      main_menu($params['FROM_USER_ID']);
+  } elseif ($event == 'ONIMCOMMANDADD') {
+      foreach ($_REQUEST['data']['COMMAND'] as $command) {
         switch ($command['COMMAND']) {
-            default:
-                break;
-        }
+          default;
+            break;
+      }
     }
-} else if ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
-    // check the event - register this application or not
-    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
-        return false;
-    }
-    // send help message how to use chat-bot. For private chat and for group chat need send different instructions.
-    main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
-} // receive event "delete chat-bot"
-else if ($_REQUEST['event'] == 'ONIMBOTDELETE') {
-    // check the event - register this application or not
-    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
-        return false;
-    }
-    // unset application variables
-    unset($appsConfig[$_REQUEST['auth']['application_token']]);
-    // save params
-    saveParams($appsConfig);
-} // receive event "Application install"
-else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
-    // handler for events
-    $handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'],
-        array(80, 443)) ? '' : ':' . $_SERVER['SERVER_PORT']) . $_SERVER['SCRIPT_NAME'];
-    // If your application supports different localizations
-    // use $_REQUEST['data']['LANGUAGE_ID'] to load correct localization
+  }
+} elseif ($event == 'ONIMBOTDELETE') {
+  if (!isValidRequest($auth)) {
+    return false;
+  }
+
+  unset($appsConfig[$auth['application_token']]);
+  saveParams($appsConfig);
+} elseif ($event == 'ONAPPINSTALL') {
+  $handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'],
+      array(80, 443)) ? '' : ':' . $_SERVER['SERVER_PORT']) . $_SERVER['SCRIPT_NAME'];
     // register new bot
     $result = restCommand('imbot.register', array(
         'CODE' => 'ValidatorBot',
@@ -72,8 +52,9 @@ else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
         'TYPE' => 'B',
         // Тип бота, B - бот, ответы  поступают сразу, H - человек, ответы поступаю с задержкой от 2х до 10 секунд
         'EVENT_MESSAGE_ADD' => $handlerBackUrl,
-        'EVENT_JOIN_CHAT' => $handlerBackUrl,
         // Ссылка на обработчик события отправки сообщения боту (обяз.)
+        'EVENT_JOIN_CHAT' => $handlerBackUrl,
+        // Ссылка на обработчик события входа в чат
         'EVENT_WELCOME_MESSAGE' => $handlerBackUrl,
         // Ссылка на обработчик события открытия диалога с ботом или приглашения его в групповой чат (обяз.)
         'EVENT_BOT_DELETE' => $handlerBackUrl,
@@ -105,8 +86,8 @@ else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
     //     'BOT_ID' => $botId, // Идентификатор бота владельца приложения для чата
     //     'CODE' => 'validator', // Код приложения для чата
     //     'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php',
-    //     'IFRAME_WIDTH' => '600', // Желаемая ширина фрейма. Минимальное значение - 250px
-    //     'IFRAME_HEIGHT' => '600', // Желаемая высота фрейма. Минимальное значение - 50px
+    //     'IFRAME_WIDTH' => '250', // Желаемая ширина фрейма. Минимальное значение - 250px
+    //     'IFRAME_HEIGHT' => '250', // Желаемая высота фрейма. Минимальное значение - 50px
     //     'HASH' => 'd1ab17949a572b0979d8db0d5b349cd2', // Токен для доступа к вашему фрейму для проверки подписи, 32 символа.
     //     'ICON_FILE' => 'iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89', // Иконка в base64
     //     'CONTEXT' => 'BOT', // Контекст
@@ -131,24 +112,6 @@ else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
 			'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php'
         ),
     ), $_REQUEST["auth"]);
-
-    // $app_id = $result['result'];
-
-    //file_put_contents("/tmp/VALIDATOR/test.log", json_encode($result));
-
-    // //меню 2-НДФЛ
-    // $result = restCommand('imbot.command.register', Array(
-    //     'BOT_ID' => $botId,
-    //     'COMMAND' => 'NDFL',
-    //     'COMMON' => 'N',
-    //     'HIDDEN' => 'Y',
-    //     'EXTRANET_SUPPORT' => 'N',
-    //     'LANG' => Array(
-    //         Array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Вывод меню для 2-НДФЛ', 'PARAMS' => ''),
-    //     ),
-    //     'EVENT_COMMAND_ADD' => $handlerBackUrl,
-    // ), $_REQUEST["auth"]);
-    // $ndfl_cmd = $result['result'];
 
     // save params
     $appsConfig[$_REQUEST['auth']['application_token']] = array(
@@ -203,7 +166,7 @@ function main_menu($user, $bot_id = 0, $message_id = 0, $app_id = 4)
 {
     $arKeyboard = array();
     $arKeyboard[] = array(
-        "TEXT" => "Начать опрос",
+        "TEXT" => "Открыть опрос",
         "BLOCK" => "Y",
         "APP_ID" => $app_id,
         "BG_COLOR" => "#D7FAF9",

@@ -39,10 +39,19 @@ securityCheck($_GET);
 <html>
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=IFRAME_WIDTH, height=IFRAME_HEIGHT initial-scale=1.0">
 	<meta charset="utf-8" />
+  <title>Опрос сотрудников</title>
 </head>
 <body style="height: 100%;margin: 0;padding: 0; background: #fff">
+  <h3>Заголовок</h3>
+    <p>Первый абзац.</p>
+    <p>Второй абзац.</p>
+	<a href="#send" onclick="frameCommunicationSend({'action': 'send', 'message': 'Send message'})">Send message</a><br><br>
+	<a href="#put" onclick="frameCommunicationSend({'action': 'put', 'message': 'Put message'})">Put message</a><br><br>
+	<a href="#call" onclick="frameCommunicationSend({'action': 'call', 'number': '123456'})">Call to number</a><br><br>
+	<a href="#support" onclick="frameCommunicationSend({'action': 'support', 'code': '6a4cdbcf753addac1a573ea64be826ca'})">Open support bot</a><br><br>
+	<a href="#close" onclick="frameCommunicationSend({'action': 'close'})">Close this window</a>
 
 	<script type="text/javascript">
 		function frameCommunicationInit()
