@@ -39,21 +39,108 @@ securityCheck($_GET);
 <html>
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	<meta name="viewport" content="width=IFRAME_WIDTH, height=IFRAME_HEIGHT initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta charset="utf-8" />
-  <title>Опрос сотрудников</title>
-</head>
-<body style="height: 100%;margin: 0;padding: 0; background: #fff">
-  <h3>Заголовок</h3>
-    <p>Первый абзац.</p>
-    <p>Второй абзац.</p>
-	<a href="#send" onclick="frameCommunicationSend({'action': 'send', 'message': 'Send message'})">Send message</a><br><br>
-	<a href="#put" onclick="frameCommunicationSend({'action': 'put', 'message': 'Put message'})">Put message</a><br><br>
-	<a href="#call" onclick="frameCommunicationSend({'action': 'call', 'number': '123456'})">Call to number</a><br><br>
-	<a href="#support" onclick="frameCommunicationSend({'action': 'support', 'code': '6a4cdbcf753addac1a573ea64be826ca'})">Open support bot</a><br><br>
-	<a href="#close" onclick="frameCommunicationSend({'action': 'close'})">Close this window</a>
+  <style>
+    .question { display: none; }
+    .question.active { display: block;}
+    .btn-new {
+        margin: 5px 5px 5px 5px;
+        text-align: center;
+        border: none;
+        border-radius: 10px;
+        text-decoration: none;
+        color: white;
+        background: #0B63F6;
+        box-shadow: 0 5px 0 #003CC5;
+    }
 
+    .btn-new:hover {
+        background: #003CC5;
+        box-shadow: none;
+        position: relative;
+        top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id='survey'>
+    <div id="question1" class="question active">
+      <p><b>Вопрос 1: Получаете ли Вы какие-либо навыки или знания в данный момент?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2')">Да, это непрерывный процесс.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2')">Нет, делаю это по необходимости.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2')">Нет, я обладаю всеми необходимыми навыками.</button>
+    </div>
+    <div id="question2" class="question">
+      <p><b>Вопрос 2: Есть ли у Вас профессиональные достижения, значимые для Вас?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3')">Да, в течение последнего года.</button>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3')">Да, это было несколько лет назад.</button>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3')">Личных нет, но я горжусь тем, что участвую в достижении общего результата.</button>
+    </div>
+    <div id="question3" class="question">
+      <p><b>Вопрос 3: Закончите фразу: «Конструктивная критика Вашей работы…»</b></p>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4')">Может снизить мотивацию.</button>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4')">Позволяет сделать выводы и извлечь пользу.</button>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4')">Остаётся для меня незамеченной и никак не отражается на моей работе.</button>
+    </div>
+    <div id="question4" class="question">
+      <p><b>Вопрос 4: Как Вы реагируете на неожиданные изменения в работе?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5')">Я подстраиваюсь под ситуацию, перемены не вызывают у меня проблем.</button>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5')">Я подстраиваюсь под ситуацию, но мне нужно время, чтобы адаптироваться и выстроить свою работу по-другому.</button>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5')">Я выполняю эту работу, но считаю это неправильным. Работа должна быть плановой.</button>
+    </div>
+    <div id="question5" class="question">
+      <p><b>Вопрос 5: Имели ли Вы опыт наставничества или обмена опытом с коллегами?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6')">Да, мы регулярно обменивались опытом с коллегами.</button>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6')">Да, это происходило при необходимости выполнить какую-либо новую задачу.</button>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6')">Нет, предпочитаю работать самостоятельно.</button>
+    </div>
+    <div id="question6" class="question">
+      <p><b>Вопрос 6: Чувствуете ли Вы свою ответственность за достижение коллективного результата?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7')">Да, чувствую.</button>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7')">Да, но с пониманием того, что у каждого своя зона ответственности. Кто-то сработал хуже, кто-то лучше.</button>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7')">Каждый несёт ответственность за свою часть работы.</button>
+    </div>
+    <div id="question7" class="question">
+      <p><b>Вопрос 7: Как Вы относитесь к  временным неудачам, возникшим при достижении целей?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8')">Отношусь к неудачам достаточно легко, не придаю им значения.</button>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8')">Считаю, что это возможность получить новый опыт.</button>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8')">Я переживаю по этому поводу. Мне требуется поддержка со стороны коллег.</button>
+    </div>
+    <div id="question8" class="question">
+      <p><b>Вопрос 8: Что Вы можете сказать о своей работе в команде?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9')">Мне нравится работать в команде, при этом могу решать какие-то задачи самостоятельно.</button>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9')">Предпочитаю работать один, но для решения каких-то задач готов работать в команде.</button>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9')">Для меня это непринципиально.</button>
+    </div>
+    <div id="question9" class="question">
+      <p><b>Вопрос 9: Как Вы относитесь к своей ответственности за достижение целей?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10')">Только от меня зависит, достигну я своей цели или нет.</button>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10')">Делаю всё, что могу, но не всё зависит только от меня.</button>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10')">От меня мало что зависит.</button>
+    </div>
+    <div id="question10" class="question">
+      <p><b>Вопрос 10: Какие действия Вы могли бы предпринять для достижения результата?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question10', 'question11')">Я просто делаю свою работу, это и так приводит к достижению результата.</button>
+      <button class="btn-new" onclick="nextQuestion('question10', 'question11')">Если необходимо, беру инициативу в свои руки, даже если меня об этом не просят.</button>
+      <button class="btn-new" onclick="nextQuestion('question10', 'question11')">Если говорят, что нужно приложить больше усилий, я, как правило, не отказываюсь.</button>
+    </div>
+    <div id="question11" class="question">
+      <p><b>Спасибо за участие в опросе!</b></p>
+      <a href="#close" class="btn-new" onclick="frameCommunicationSend({'action': 'close'})">Закрыть окно</a>
+    </div>
+  </div>
 	<script type="text/javascript">
+    function nextQuestion(currentId, nextId) {
+        var currentQuestion = document.getElementById(currentId);
+        var nextQuestion = document.getElementById(nextId);
+
+        if (currentQuestion && nextQuestion) {
+          currentQuestion.classList.remove('active');
+          nextQuestion.classList.add('active');
+        }
+    }
+
 		function frameCommunicationInit()
 		{
 			if (!window.frameCommunication)
