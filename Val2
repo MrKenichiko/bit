@@ -1,4 +1,427 @@
-handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'],
+<?php
+/**
+ * Валидатор БОТ
+ */
+// require "extranet.php";
+
+$appsConfig = array();
+$configFileName = '/config_' . trim(str_replace('.', '_', $_REQUEST['auth']['domain'])) . '.php';
+if (file_exists(__DIR__ . $configFileName)) {
+    include_once __DIR__ . $configFileName;
+}
+// receive event "new message for bot"
+if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
+
+    if (!isset($_REQUEST['auth']['application_token'])) {
+        return false;
+    }
+
+    $msg = strtolower($_REQUEST['data']['PARAMS']['MESSAGE']);
+
+    main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+} elseif ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
+    if (!isset($_REQUEST['auth']['application_token'])) {
+        return false;
+    }
+
+    foreach ($_REQUEST['data']['COMMAND'] as $command) {
+        switch ($command['COMMAND']) {
+            default:
+                break;
+        }
+    }
+} elseif ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
+    // check the event - register this application or not
+    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
+        return false;
+    }
+    // send help message how to use chat-bot. For private chat and for group chat need send different instructions.
+    welcom_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+} // receive event "delete chat-bot"
+elseif ($_REQUEST['event'] == 'ONIMBOTDELETE') {
+    // check the event - register this application or not
+    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
+        return false;
+    }
+    // unset application variables
+    unset($appsConfig[$_REQUEST['auth']['application_token']]);
+    // save params
+    saveParams($appsConfig);
+} // receive event "Application install"
+else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
+    // handler for events
+    $handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'],
+        array(80, 443)) ? '' : ':' . $_SERVER['SERVER_PORT']) . $_SERVER['SCRIPT_NAME'];
+    $result = restCommand('imbot.register', array(
+        'CODE' => 'ValidatorBot',
+        // строковой идентификатор бота, уникальный в рамках вашего приложения (обяз.)
+        'TYPE' => 'B',
+        // Тип бота, B - бот, ответы  поступают сразу, H - человек, ответы поступаю с задержкой от 2х до 10 секунд
+        'EVENT_MESSAGE_ADD' => $handlerBackUrl,
+        'EVENT_JOIN_CHAT' => $handlerBackUrl,
+        // Ссылка на обработчик события отправки сообщения боту (обяз.)
+        'EVENT_WELCOME_MESSAGE' => $handlerBackUrl,
+        // Ссылка на обработчик события открытия диалога с ботом или приглашения его в групповой чат (обяз.)
+        'EVENT_BOT_DELETE' => $handlerBackUrl,
+        // Ссылка на обработчик события удаление бота со стороны клиента (обяз.)
+        'PROPERTIES' => array( // Личные данные чат-бота (обяз.)
+            'NAME' => 'Валидатор БОТ',
+            // Имя бота (обязательное одно из полей NAME или LAST_NAME)
+            'LAST_NAME' => '',
+            // Фамилия бота (обязательное одно из полей NAME или LAST_NAME)
+            'COLOR' => 'AQUA',
+            // Цвет бота для мобильного приложения RED,  GREEN, MINT, LIGHT_BLUE, DARK_BLUE, PURPLE, AQUA, PINK, LIME, BROWN,  AZURE, KHAKI, SAND, MARENGO, GRAY, GRAPHITE
+            'EMAIL' => 'validatorno@mail.com',
+            // Емейл для связи
+            'PERSONAL_BIRTHDAY' => '2016-03-23',
+            // День рождения в формате YYYY-mm-dd
+            'WORK_POSITION' => 'Бот',
+            // Занимаемая должность, используется как описание бота
+            'PERSONAL_WWW' => '',
+            // Ссылка на сайт
+            'PERSONAL_GENDER' => 'M',
+            // Пол бота, допустимые значения M -  мужской, F - женский, пусто если не требуется указывать
+        ),
+    ), $_REQUEST["auth"]);
+    $botId = $result['result'];
+
+    $result = restCommand('imbot.app.register', array(
+         'BOT_ID' => $botId, // Идентификатор бота владельца приложения для чата
+         'CODE' => 'validator', // Код приложения для чата
+         'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php',
+         'IFRAME_WIDTH' => '600', // Желаемая ширина фрейма. Минимальное значение - 250px
+         'IFRAME_HEIGHT' => '600', // Желаемая высота фрейма. Минимальное значение - 50px
+         'HASH' => 'd1ab17949a572b0979d8db0d5b349cd2', // Токен для доступа к вашему фрейму для проверки подписи, 32 символа.
+         'ICON_FILE' => 'iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89', // Иконка в base64
+         'CONTEXT' => 'BOT', // Контекст
+         'HIDDEN' => 'Y', // Скрытое приложение или нет
+         'EXTRANET_SUPPORT' => 'N', // Доступна ли команда пользователям экстранет, по умолчанию N
+         'LIVECHAT_SUPPORT' => 'N', // Поддержка онлайн-чата
+         'IFRAME_POPUP' => 'Y', // iframe будет открыт с возможностью перемещения внутри мессенджера, переход между диалогами не будет закрывать такое окно.
+         'LANG' => array( // Массив переводов, желательно указывать как минимум для RU и EN
+             array('LANGUAGE_ID' => 'en', 'TITLE' => 'Validator', 'DESCRIPTION' => 'Open Validator', 'COPYRIGHT' => 'Bitrix24'),
+             array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Валидатор', 'DESCRIPTION' => 'Открыть Валидатор', 'COPYRIGHT' => 'Bitrix24'),
+         ),
+    ), $_REQUEST["auth"]);
+
+    $result = restCommand('imbot.app.update', array(
+
+        'APP_ID' => 4,
+        'FIELDS' => array(
+             'LANG' => array(
+			 	          array('LANGUAGE_ID' => 'en', 'TITLE' => 'Validator', 'DESCRIPTION' => 'Open Validator', 'COPYRIGHT' => 'Bitrix24'),
+			 	          array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Валидатор', 'DESCRIPTION' => 'Открыть Валидатор', 'COPYRIGHT' => 'Bitrix24'),
+			       ),
+			       'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php'
+        ),
+   ), $_REQUEST["auth"]);
+}
+
+function saveParams($params)
+{
+    $config = "<?php\n";
+    $config .= "\$appsConfig = " . var_export($params, true) . ";\n";
+    $config .= "?>";
+    $configFileName = '/config_' . trim(str_replace('.', '_', $_REQUEST['auth']['domain'])) . '.php';
+    file_put_contents(__DIR__ . $configFileName, $config);
+    return true;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $input = json_decode(file_get_contents('php://input'), true);
+
+  if (isset($input['action']) && $inputp['action'] === ;'survey_results') {
+    $surveyData = $input['surveyData'];
+    $userId = $input['userId'];
+    $dialogId = $input['dialogId'];
+
+    $message = "Результаты опроса:\n";
+    foreach ($surveyData as $question => $answer) {
+      $message .= "$question: $answer\n";
+    }
+
+    restCommand('imbot.message.add', array(
+      'DIALOG_ID' => $dialogId,
+      'MESSAGE' => $message,
+    ), $_REQUEST['auth']);
+  }
+}
+function restCommand($method, array $params = array(), array $auth = array())
+{
+    $queryUrl = 'https://' . $auth['domain'] . '/rest/' . $method;
+    $queryData = http_build_query(array_merge($params, array('auth' => $auth['access_token'])));
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_POST => 1,
+        CURLOPT_HEADER => 0,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_URL => $queryUrl,
+        CURLOPT_POSTFIELDS => $queryData,
+    ));
+    $result = curl_exec($curl);
+    curl_close($curl);
+    $result = json_decode($result, 1);
+    return $result;
+}
+
+function writeToLog($data, $title = '')
+{
+    $log = "\n------------------------\n";
+    $log .= date("Y.m.d G:i:s") . "\n";
+    $log .= (strlen($title) > 0 ? $title : 'DEBUG') . "\n";
+    $log .= print_r($data, 1);
+    $log .= "\n------------------------\n";
+    file_put_contents(__DIR__ . '/iframe.log', $log, FILE_APPEND);
+    return true;
+}
+function welcom_menu($user, $bot_id = 0, $message_id = 0, $app_id = 4)
+{
+    $arKeyboard = array();
+    $arKeyboard[] = array(
+        "TEXT" => "Начать опрос",
+        "BLOCK" => "Y",
+        "APP_ID" => $app_id,
+        "BG_COLOR" => "#D7FAF9",
+        "TEXT_COLOR" => "#000000",
+    );
+
+    $message = "[B]Уважаемый коллега! Мы очень рады, что Вы становитесь частью большого коллектива АО «РЕШЕТНЁВ»![/B][BR]Предлагаем Вам ответить на несколько вопросов анкеты. Это поможет нам улучшить обстановку в коллективе, сделать её комфортнее и благоприятнее. Ваше мнение очень важно для нас!";
+
+    $result = restCommand('imbot.message.add', array(
+        'DIALOG_ID' => 1, // Идентификатор диалога; это либо USER_ID пользователя, либо chatXX - где XX идентификатор чата, передается в событии ONIMBOTMESSAGEADD и ONIMJOINCHAT
+        'MESSAGE' => $message, // Тест сообщения
+        'ATTACH' => '', // Вложение, необязательное поле
+        "KEYBOARD" => $arKeyboard, // Клавиатура, необязательное поле
+    ), $_REQUEST["auth"]);
+}
+
+
+function main_menu($user, $bot_id = 0, $message_id = 0, $app_id = 4)
+{
+    $arKeyboard = array();
+    $arKeyboard[] = array(
+        "TEXT" => "Начать опрос",
+        "BLOCK" => "Y",
+        "APP_ID" => $app_id,
+        "BG_COLOR" => "#D7FAF9",
+        "TEXT_COLOR" => "#000000",
+    );
+
+    $message = "[B]Уважаемый коллега! Мы очень рады, что Вы становитесь частью большого коллектива АО «РЕШЕТНЁВ»![/B][BR]Предлагаем Вам ответить на несколько вопросов анкеты. Это поможет нам улучшить обстановку в коллективе, сделать её комфортнее и благоприятнее. Ваше мнение очень важно для нас!";
+
+    $result = restCommand('imbot.message.add', array(
+        "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+        "MESSAGE" => $message,
+        "KEYBOARD" => $arKeyboard,
+    ), $_REQUEST["auth"]);
+    return $result;
+}
+
+function back($user, $bot_id, $message_id, $params)
+{
+    include 'db.php';
+    switch ($params) {
+        default:
+            //главное меню
+            $arResult = main_menu($user, $bot_id, $message_id);
+            $arResult1 = welcom_menu($user, $bot_id, $message_id);
+            break;
+    }
+}
+//////////////////
+<?
+/*
+$_GET
+(
+    [BOT_ID] => 17
+    [BOT_CODE] => echoBot
+    [APP_ID] => 4
+    [APP_CODE] => echoFrame
+    [DOMAIN] => https://test.bitrix24.ru
+    [DOMAIN_HASH] => d1ab17949a572b0979d8db0d5b349cd2
+    [USER_ID] => 2
+    [USER_HASH] => 7e23ac8b6f6c7044076301c7f81cd745
+    [DIALOG_ID] => 950
+    [CONTEXT] => textarea
+    [LANG] => ru
+    [IS_CHROME] => Y
+    [MESSAGE_ID] => 12333
+    [BUTTON_PARAMS] => test
+
+)
+ */
+
+function writeToLog($data, $title = '')
+{
+    $log = "\n------------------------\n";
+    $log .= date("Y.m.d G:i:s") . "\n";
+    $log .= (strlen($title) > 0 ? $title : 'DEBUG') . "\n";
+    $log .= print_r($data, 1);
+    $log .= "\n------------------------\n";
+    file_put_contents(__DIR__ . '/iframe.log', $log, FILE_APPEND);
+    return true;
+}
+
+securityCheck($_GET);
+
+//writeToLog(json_encode($_GET));
+?>
+
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="utf-8" />
+  <style>
+    .question { display: none; }
+    .question.active { display: block;}
+    .btn-new {
+        margin: 5px 5px 5px 5px;
+        text-align: center;
+        border: none;
+        border-radius: 10px;
+        text-decoration: none;
+        color: white;
+        background: #0B63F6;
+        box-shadow: 0 5px 0 #003CC5;
+    }
+
+    .btn-new:hover {
+        background: #003CC5;
+        box-shadow: none;
+        position: relative;
+        top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id='survey'>
+    <div id="question1" class="question active">
+      <p><b>Вопрос 1: Получаете ли Вы какие-либо навыки или знания в данный момент?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Да, это непрерывный процесс.')">Да, это непрерывный процесс.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Нет, делаю это по необходимости.')">Нет, делаю это по необходимости.</button>
+      <button class="btn-new" onclick="nextQuestion('question1', 'question2', 'Нет, я обладаю всеми необходимыми навыками.')">Нет, я обладаю всеми необходимыми навыками.</button>
+    </div>
+    <div id="question2" class="question">
+      <p><b>Вопрос 2: Есть ли у Вас профессиональные достижения, значимые для Вас?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Да, в течение последнего года.')">Да, в течение последнего года.</button>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Да, это было несколько лет назад.')">Да, это было несколько лет назад.</button>
+      <button class="btn-new" onclick="nextQuestion('question2', 'question3', 'Личных нет, но я горжусь тем, что участвую в достижении общего результата.')">Личных нет, но я горжусь тем, что участвую в достижении общего результата.</button>
+    </div>
+    <div id="question3" class="question">
+      <p><b>Вопрос 3: Закончите фразу: «Конструктивная критика Вашей работы…»</b></p>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Может снизить мотивацию.')">Может снизить мотивацию.</button>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Позволяет сделать выводы и извлечь пользу.')">Позволяет сделать выводы и извлечь пользу.</button>
+      <button class="btn-new" onclick="nextQuestion('question3', 'question4', 'Остаётся для меня незамеченной и никак не отражается на моей работе.')">Остаётся для меня незамеченной и никак не отражается на моей работе.</button>
+    </div>
+    <div id="question4" class="question">
+      <p><b>Вопрос 4: Как Вы реагируете на неожиданные изменения в работе?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я подстраиваюсь под ситуацию, перемены не вызывают у меня проблем.')">Я подстраиваюсь под ситуацию, перемены не вызывают у меня проблем.</button>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я подстраиваюсь под ситуацию, но мне нужно время, чтобы адаптироваться и выстроить свою работу по-другому.')">Я подстраиваюсь под ситуацию, но мне нужно время, чтобы адаптироваться и выстроить свою работу по-другому.</button>
+      <button class="btn-new" onclick="nextQuestion('question4', 'question5', 'Я выполняю эту работу, но считаю это неправильным. Работа должна быть плановой.')">Я выполняю эту работу, но считаю это неправильным. Работа должна быть плановой.</button>
+    </div>
+    <div id="question5" class="question">
+      <p><b>Вопрос 5: Имели ли Вы опыт наставничества или обмена опытом с коллегами?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Да, мы регулярно обменивались опытом с коллегами.')">Да, мы регулярно обменивались опытом с коллегами.</button>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Да, это происходило при необходимости выполнить какую-либо новую задачу.')">Да, это происходило при необходимости выполнить какую-либо новую задачу.</button>
+      <button class="btn-new" onclick="nextQuestion('question5', 'question6', 'Нет, предпочитаю работать самостоятельно.')">Нет, предпочитаю работать самостоятельно.</button>
+    </div>
+    <div id="question6" class="question">
+      <p><b>Вопрос 6: Чувствуете ли Вы свою ответственность за достижение коллективного результата?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Да, чувствую.')">Да, чувствую.</button>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Да, но с пониманием того, что у каждого своя зона ответственности. Кто-то сработал хуже, кто-то лучше.')">Да, но с пониманием того, что у каждого своя зона ответственности. Кто-то сработал хуже, кто-то лучше.</button>
+      <button class="btn-new" onclick="nextQuestion('question6', 'question7', 'Каждый несёт ответственность за свою часть работы.')">Каждый несёт ответственность за свою часть работы.</button>
+    </div>
+    <div id="question7" class="question">
+      <p><b>Вопрос 7: Как Вы относитесь к временным неудачам, возникшим при достижении целей?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Отношусь к неудачам достаточно легко, не придаю им значения.')">Отношусь к неудачам достаточно легко, не придаю им значения.</button>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Считаю, что это возможность получить новый опыт.')">Считаю, что это возможность получить новый опыт.</button>
+      <button class="btn-new" onclick="nextQuestion('question7', 'question8', 'Я переживаю по этому поводу. Мне требуется поддержка со стороны коллег.')">Я переживаю по этому поводу. Мне требуется поддержка со стороны коллег.</button>
+    </div>
+    <div id="question8" class="question">
+      <p><b>Вопрос 8: Что Вы можете сказать о своей работе в команде?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Мне нравится работать в команде, при этом могу решать какие-то задачи самостоятельно.')">Мне нравится работать в команде, при этом могу решать какие-то задачи самостоятельно.</button>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Предпочитаю работать один, но для решения каких-то задач готов работать в команде.')">Предпочитаю работать один, но для решения каких-то задач готов работать в команде.</button>
+      <button class="btn-new" onclick="nextQuestion('question8', 'question9', 'Для меня это непринципиально.')">Для меня это непринципиально.</button>
+    </div>
+    <div id="question9" class="question">
+      <p><b>Вопрос 9: Как Вы относитесь к своей ответственности за достижение целей?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'Только от меня зависит, достигну я своей цели или нет.')">Только от меня зависит, достигну я своей цели или нет.</button>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'От того, как я буду выстраивать свою работу, зависит, достигну я цели или нет.')">От того, как я буду выстраивать свою работу, зависит, достигну я цели или нет.</button>
+      <button class="btn-new" onclick="nextQuestion('question9', 'question10', 'Всё зависит от стечения обстоятельств.')">Всё зависит от стечения обстоятельств.</button>
+    </div>
+    <div id="question10" class="question">
+      <p><b>Вопрос 10: Можете ли Вы самостоятельно принять решение в стрессовой ситуации?</b></p>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Да, могу.')">Да, могу.</button>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Могу, но потом очень долго переживаю.')">Могу, но потом очень долго переживаю.</button>
+      <button class="btn-new" onclick="nextQuestion('question10', 'end', 'Нет, мне нужно посоветоваться.')">Нет, мне нужно посоветоваться.</button>
+    </div>
+    <div id="end" class="question">
+      <p>Спасибо за прохождение опроса!</p>
+      <a href="#close" class="btn-new" onclick="frameCommunicationSend({'action': 'close'})">Закрыть окно</a>
+    </div>
+  </div>
+	<script type="text/javascript">
+    var surveyData = {};
+    function nextQuestion(currentId, nextId, answer) {
+        surveyData[currentId] = answer;
+        var currentQuestion = document.getElementById(currentId);
+        var nextQuestion = document.getElementById(nextId);
+
+        if (currentQuestion && nextQuestion) {
+          currentQuestion.classList.remove('active');
+          nextQuestion.classList.add('active');
+        }
+
+        if (nextId === 'end') {
+          frameCommunicationSend(surveyData);
+      }
+    }
+
+		function frameCommunicationInit()
+		{
+			if (!window.frameCommunication)
+			{
+				window.frameCommunication = {timeout: {}};
+			}
+			if(typeof window.postMessage === 'function')
+			{
+				window.addEventListener('message', function(event){
+					var data = {};
+					try { data = JSON.parse(event.data); } catch (err){}
+
+					if (data.action == 'init')
+					{
+						frameCommunication.uniqueLoadId = data.uniqueLoadId;
+						frameCommunication.postMessageSource = event.source;
+						frameCommunication.postMessageOrigin = event.origin;
+					}
+				});
+			}
+		}
+		function frameCommunicationSend(data)
+		{
+			data['uniqueLoadId'] = frameCommunication.uniqueLoadId;
+			var encodedData = JSON.stringify(data);
+			if (!frameCommunication.postMessageOrigin)
+			{
+				clearTimeout(frameCommunication.timeout[encodedData]);
+				frameCommunication.timeout[encodedData] = setTimeout(function(){
+					frameCommunicationSend(data);
+				}, 10);
+				return true;
+			}
+			if(typeof window.postMessage === 'function')
+			{
+				if(frameCommunication.postMessageSource)
+				{
+					frameCommunication.postMessageSource.postMessage(
+						encodedData,
+						frameCommunication.postMessageOrigin
+					);
+				}
+			}
+      handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'],
           array(80, 443)) ? '' : ':' . $_SERVER['SERVER_PORT']) . $_SERVER['SCRIPT_NAME'];
       if (data.action === 'close') {
         fetch(handlerBackUrl, {
@@ -8,9 +431,52 @@ handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $
           },
           body: JSON.stringify({
             action: 'survey_results',
-            surveyData: surveyData
+            surveyData: surveyData,
             userId: <?php echo json_encode($_GET['USER_ID']); ?>,
             dialogId: <?php echo json_encode($_GET['DIALOG_ID']); ?>
           }),
         });
       }
+		}
+
+		frameCommunicationInit();
+	</script>
+
+
+</body>
+</html>
+
+<?
+function securityCheck($params)
+{
+	// this hash you setted in register rest command
+	$appHash = 'd1ab17949a572b0979d8db0d5b349cd2';
+
+	$check = parse_url($params['DOMAIN']);
+	if (!in_array($check['scheme'], Array('http', 'https')) || empty($check['host']))
+	{
+		die("BC_IFRAME_ERROR_ADDRESS");
+	}
+	$params['DOMAIN'] = $check['scheme'].'://'.$check['host'];
+	$params['SERVER_NAME'] = $check['host'];
+
+	if (strpos($_SERVER['HTTP_REFERER'], $params['DOMAIN']) !== 0)
+	{
+		die("BC_IFRAME_ERROR_SECURITY");
+	}
+
+	// get from config
+	if ($appHash)
+	{
+		if ($params['DOMAIN_HASH'] != md5($params['SERVER_NAME'].$appHash))
+		{
+			die("BC_IFRAME_ERROR_AUTH");
+		}
+	}
+	else
+	{
+		die("BC_IFRAME_ERROR_AUTH_2");
+	}
+
+	return $params;
+}
