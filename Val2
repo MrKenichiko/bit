@@ -1,4 +1,3 @@
-Как мне вывести ответы, которые выбрал пользователь на блоке с id survey?
 <?
 /*
 $_GET
@@ -129,11 +128,11 @@ securityCheck($_GET);
     <div id="end" class="question">
       <p>Спасибо за прохождение опроса!</p>
       <a href="#close" class="btn-new" onclick="frameCommunicationSend({'action': 'close'})">Закрыть окно</a>
-      <button class="btn-new" onclick="nextQuestion('end', 'survey', 'Ответы')">Посмотреть ответы</button>
+      <button class="btn-new" onclick="nextQuestion('end', 'surveyResult', 'Ответы')">Посмотреть ответы</button>
     </div>
-    <div id="survey" class="question">
+    <div id="surveyResult" class="question">
       <div id="answers" class="question">
-        <h4>Ответы:</h4>
+        <h1>Ответы:</h1>
       </div>
       <a href="#close" class="btn-new" onclick="frameCommunicationSend({'action': 'close'})">Закрыть окно</a>
     </div>
@@ -154,12 +153,20 @@ securityCheck($_GET);
           frameCommunicationSend(surveyData);
         }
 
-        if (nextId === 'survey') {
+        if (nextId === 'surveyResult') {
           displayAnswers();
         }
     }
 
-    
+    function displayAnswers() {
+      var answerDiv = document.getElementById('answers');
+      answerDiv.innerHTML = '';
+      for (var questionId in surveyData) {
+        var questionText = document.querySelector('#' + questionId + 'p').innerText;
+        var answerText = surveyData[questionID];
+        answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answerText + '</p>';
+      }
+    }
 
 		function frameCommunicationInit()
 		{
