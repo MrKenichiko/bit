@@ -1,4 +1,4 @@
-На странице с id surveyResult отображается только кнопка Закрыть окно и ничего более
+Как мне кнопку закрытия окна сделать ниже вопросов? Если возможно, то сделай добавление по аналогии с вопросами(через условие и добавление того, что ответил пользователь)
 <?
 /*
 $_GET
@@ -132,9 +132,7 @@ securityCheck($_GET);
       <button class="btn-new" onclick="nextQuestion('end', 'surveyResult', 'Ответы')">Посмотреть ответы</button>
     </div>
     <div id="surveyResult" class="question">
-      <div id="answers" class="question">
-        <h1>Ответы:</h1>
-      </div>
+      <h4>Ответы:</h4>
       <a href="#close" class="btn-new" onclick="frameCommunicationSend({'action': 'close'})">Закрыть окно</a>
     </div>
   </div>
@@ -154,20 +152,58 @@ securityCheck($_GET);
           frameCommunicationSend(surveyData);
         }
 
-        if (nextId === 'surveyResult') {
-          displayAnswers();
+        if (currentId === 'question1') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question2') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question3') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question4') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question5') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question6') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question7') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question8') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question9') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
+        }
+        if (currentId === 'question10') {
+          var answerDiv = document.getElementById('surveyResult');
+          var questionText = currentQuestion.querySelector('p').innerText;
+          answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answer + '</p>';
         }
     }
 
-    function displayAnswers() {
-      var answerDiv = document.getElementById('answers');
-      answerDiv.innerHTML = '';
-      for (var questionId in surveyData) {
-        var questionText = document.querySelector('#' + questionId + 'p').innerText;
-        var answerText = surveyData[questionID];
-        answerDiv.innerHTML += '<p><b>' + questionText + '</b><br>' + answerText + '</p>';
-      }
-    }
 
 		function frameCommunicationInit()
 		{
