@@ -1,24 +1,4 @@
 <?
-/*
-$_GET
-(
-    [BOT_ID] => 17
-    [BOT_CODE] => echoBot
-    [APP_ID] => 4
-    [APP_CODE] => echoFrame
-    [DOMAIN] => https://test.bitrix24.ru
-    [DOMAIN_HASH] => d1ab17949a572b0979d8db0d5b349cd2
-    [USER_ID] => 2
-    [USER_HASH] => 7e23ac8b6f6c7044076301c7f81cd745
-    [DIALOG_ID] => 950
-    [CONTEXT] => textarea
-    [LANG] => ru
-    [IS_CHROME] => Y
-    [MESSAGE_ID] => 12333
-    [BUTTON_PARAMS] => test
-
-)
- */
 
 function writeToLog($data, $title = '')
 {
@@ -33,7 +13,6 @@ function writeToLog($data, $title = '')
 
 securityCheck($_GET);
 
-//writeToLog(json_encode($_GET));
 ?>
 
 <html>
@@ -42,6 +21,9 @@ securityCheck($_GET);
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta charset="utf-8" />
   <style>
+    .answerh2 {
+      margin-left: 5px;
+    }
     h1,h2,h3,p {
       display: inline-block;
       text-shadow:
@@ -69,7 +51,9 @@ securityCheck($_GET);
       width: 0%;
       border-bottom-width: 1px;
     }
-    .question { display: none; }
+    .question {
+      display: none;
+    }
     .question.active { display: block;}
     .btn-new {
         margin: 5px 5px 5px 5px;
@@ -87,6 +71,40 @@ securityCheck($_GET);
         box-shadow: none;
         position: relative;
         top: 5px;
+    }
+    .rating {
+      max-width: 33rem;
+      background: #fff;
+      margin: 0 1rem;
+      padding: 1rem;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      border-radius: 0.5rem;
+    }
+
+    .star {
+      font-size: 10vh;
+      cursor: pointer;
+    }
+
+    .one {
+      color: rgb(255, 0, 0);
+    }
+
+    .two {
+      color: rgb(255, 106, 0);
+    }
+
+    .three {
+      color: rgb(251, 255, 120);
+    }
+
+    .four {
+      color: rgb(255, 255, 0);
+    }
+
+    .five {
+      color: rgb(24, 159, 14);
     }
   </style>
 </head>
@@ -154,20 +172,69 @@ securityCheck($_GET);
     </div>
     <div id="end" class="question">
       <p>Спасибо за прохождение опроса!</p>
-      <a href="#close" class="btn-new" onclick="frameCommunicationSend({'action': 'close'})">Закрыть окно</a>
+      <a href="#close" class="btn-new" onclick="sendAnswers()">Закрыть окно</a>
       <button class="btn-new" onclick="nextQuestion('end', 'surveyResult', 'Ответы')">Посмотреть ответы</button>
     </div>
     <div id="surveyResult" class="question">
-      <h2><b>Ответы:</b></h2>
+      <h2 class="answerh2"><b>Ответы:</b></h2>
       <div id="answers">
       </div>
-      <a href="#close" class="btn-new" onclick="frameCommunicationSend({'action': 'close'})">Закрыть окно</a>
+      <a href="#close" class="btn-new" onclick="sendAnswers()">Закрыть окно</a>
       <a href="#close" class="btn-new" onclick="nextQuestion('surveyResult', 'question1', 'Начать с нуля')">Начать с нуля</a>
+      <a href="#close" class="btn-new" onclick="nextQuestion('surveyResult', 'rating', 'Оценка')">Оценить</a>
+    </div>
+    <div id="rating" class="question">
+      <span onclick="gfg(1)"
+            class="star">★
+      </span>
+      <span onclick="gfg(2)"
+            class="star">★
+      </span>
+      <span onclick="gfg(3)"
+            class="star">★
+      </span>
+      <span onclick="gfg(4)"
+            class="star">★
+      </span>
+      <span onclick="gfg(5)"
+            class="star">★
+      </span>
+      <h3 id="output">
+            Рейтинг: 0/5
+      </h3>
+      <a href="#close" class="btn-new" onclick="sendAnswers()">Закрыть окно</a>
     </div>
   </div>
 	<script type="text/javascript">
+  let userAnswers = [];
+  let stars =
+    document.getElementsByClassName("star");
+  let output =
+    document.getElementById("output");
+
+    function gfg(n) {
+      remove();
+      for (let i = 0; i < n; i++) {
+          if (n == 1) cls = "one";
+          else if (n == 2) cls = "two";
+          else if (n == 3) cls = "three";
+          else if (n == 4) cls = "four";
+          else if (n == 5) cls = "five";
+          stars[i].className = "star " + cls;
+      }
+      output.innerText = "Рейтинг: " + n + "/5";
+    }
+
+    function remove() {
+      let i = 0;
+      while (i < 5) {
+          stars[i].className = "star";
+          i++;
+      }
+    }
     var surveyData = {};
     function nextQuestion(currentId, nextId, answer) {
+        userAnswers.push(answer);
         surveyData[currentId] = answer;
         var currentQuestion = document.getElementById(currentId);
         var nextQuestion = document.getElementById(nextId);
@@ -175,10 +242,6 @@ securityCheck($_GET);
         if (currentQuestion && nextQuestion) {
           currentQuestion.classList.remove('active');
           nextQuestion.classList.add('active');
-        }
-
-        if (nextId === 'end') {
-          frameCommunicationSend(surveyData);
         }
 
         if (currentId === 'question1') {
@@ -233,7 +296,30 @@ securityCheck($_GET);
         }
     }
 
+
+
+function sendAnswers() {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "index.php", true);
+      xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+      const data = {
+        dialogId: 'DIALOG_ID',
+        answers: userAnswers,
+        userId: 'USER_ID',
+      };
+
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log('Answers sent to server:', xhr.responseText);
+        }
+      };
+
+      xhr.send(JSON.stringify(data));
+
+      frameCommunicationSend({'action': 'close'})
     }
+
 		function frameCommunicationInit()
 		{
 			if (!window.frameCommunication)
@@ -278,7 +364,6 @@ securityCheck($_GET);
 				}
 			}
 		}
-
 
 		frameCommunicationInit();
 	</script>
