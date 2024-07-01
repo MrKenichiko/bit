@@ -9,6 +9,16 @@ $configFileName = '/config_' . trim(str_replace('.', '_', $_REQUEST['auth']['dom
 if (file_exists(__DIR__ . $configFileName)) {
     include_once __DIR__ . $configFileName;
 }
+function writeVarDumpToFile($data, $filename) {
+  ob_start();
+
+  var_dump($data);
+
+  $output = ob_get_clean();
+
+  file_put_contents($filename, $output, FILE_APPEND);
+}
+writeVarDumpToFile($_REQUEST, __DIR__ . '/vardump.log');
 // receive event "new message for bot"
 if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
 
@@ -19,7 +29,8 @@ if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
     $msg = strtolower($_REQUEST['data']['PARAMS']['MESSAGE']);
 
     main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
-} elseif ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
+}
+else if ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
     if (!isset($_REQUEST['auth']['application_token'])) {
         return false;
     }
@@ -30,7 +41,8 @@ if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
                 break;
         }
     }
-} elseif ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
+}
+else if ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
     // check the event - register this application or not
     if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
         return false;
@@ -38,7 +50,18 @@ if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
     // send help message how to use chat-bot. For private chat and for group chat need send different instructions.
     welcom_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
 } // receive event "delete chat-bot"
-elseif ($_REQUEST['event'] == 'ONIMBOTDELETE') {
+else if ($_SERVER['REQUEST_METHOD'] == 'POST')
+{
+  $postData = file_get_contents('php://input');
+  $data = json_decode($postData, true);
+
+  if (isset($data['answers']) && isset($data['userId']) && isset($data['dialogId'])) {
+    file_put_contents(__DIR__ . '/survey_results.log', print_r($data, true), FILE_APPEND);
+
+    processSurveyData($data['userId'], $data['dialogId'], $data['answers']);
+  }
+}
+else if ($_REQUEST['event'] == 'ONIMBOTDELETE') {
     // check the event - register this application or not
     if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
         return false;
@@ -47,7 +70,8 @@ elseif ($_REQUEST['event'] == 'ONIMBOTDELETE') {
     unset($appsConfig[$_REQUEST['auth']['application_token']]);
     // save params
     saveParams($appsConfig);
-} // receive event "Application install"
+}
+// receive event "Application install"
 else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
     // handler for events
     $handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'],
@@ -89,8 +113,8 @@ else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
          'BOT_ID' => $botId, // Идентификатор бота владельца приложения для чата
          'CODE' => 'validator', // Код приложения для чата
          'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php',
-         'IFRAME_WIDTH' => '600', // Желаемая ширина фрейма. Минимальное значение - 250px
-         'IFRAME_HEIGHT' => '600', // Желаемая высота фрейма. Минимальное значение - 50px
+         'IFRAME_WIDTH' => '1600px', // Желаемая ширина фрейма. Минимальное значение - 250px
+         'IFRAME_HEIGHT' => '900px', // Желаемая высота фрейма. Минимальное значение - 50px
          'HASH' => 'd1ab17949a572b0979d8db0d5b349cd2', // Токен для доступа к вашему фрейму для проверки подписи, 32 символа.
          'ICON_FILE' => 'iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89', // Иконка в base64
          'CONTEXT' => 'BOT', // Контекст
@@ -127,22 +151,50 @@ function saveParams($params)
     return true;
 }
 
-function restCommand($method, array $params = array(), array $auth = array())
+function restCommand($method, $params, $auth = array())
 {
-    $queryUrl = 'https://' . $auth['domain'] . '/rest/' . $method;
-    $queryData = http_build_query(array_merge($params, array('auth' => $auth['access_token'])));
-    $curl = curl_init();
-    curl_setopt_array($curl, array(
-        CURLOPT_POST => 1,
-        CURLOPT_HEADER => 0,
-        CURLOPT_RETURNTRANSFER => 1,
-        CURLOPT_URL => $queryUrl,
-        CURLOPT_POSTFIELDS => $queryData,
-    ));
-    $result = curl_exec($curl);
-    curl_close($curl);
-    $result = json_decode($result, 1);
-    return $result;
+  $queryUrl = 'https://' .$_REQUEST['auth']['domain'].'/rest/'.$method;
+  $queryData = http_build_query(array_merge($params, array('auth' => $_REQUEST['auth']['access_token'])));
+
+  $curl = curl_init();
+  curl_setopt_array($curl, array(
+    CURLOPT_POST => 1,
+    CURLOPT_HEADER => 0,
+    CURLOPT_RETURNTRANSFER => 1,
+    CURLOPT_URL => $queryUrl,
+    CURLOPT_POSTFIELDS => $queryData,
+  ));
+  $result = curl_exec($curl);
+  curl_close($curl);
+
+  return json_decode($result, true);
+}
+//function restCommand($method, array $params = array(), array $auth = array())
+//{
+//    $queryUrl = 'https://' . $auth['domain'] . '/rest/' . $method;
+//    $queryData = http_build_query(array_merge($params, array('auth' => $auth['access_token'])));
+//    $curl = curl_init();
+//    curl_setopt_array($curl, array(
+//        CURLOPT_POST => 1,
+//        CURLOPT_HEADER => 0,
+//        CURLOPT_RETURNTRANSFER => 1,
+//        CURLOPT_URL => $queryUrl,
+//        CURLOPT_POSTFIELDS => $queryData,
+//    ));
+//    $result = curl_exec($curl);
+//    curl_close($curl);
+//    $result = json_decode($result, 1);
+//    return $result;
+//}
+
+function processSurveyData($userId, $dialogId, $answers){
+  $responseMessage = "Спасибо за прохождение опроса! Ваши ответы: " . implode(", ", $answers);
+
+  restCommand('imbot.message.add', array(
+    'DIALOG_ID' => $dialogId,
+    'MESSAGE' => $responseMessage,
+    'SYSTEM' => 'Y'
+  ));
 }
 
 function writeToLog($data, $title = '')
@@ -155,6 +207,7 @@ function writeToLog($data, $title = '')
     file_put_contents(__DIR__ . '/iframe.log', $log, FILE_APPEND);
     return true;
 }
+
 function welcom_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
 {
     $arKeyboard = array();
@@ -196,8 +249,6 @@ function main_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
     ), $_REQUEST["auth"]);
     return $result;
 }
-
- 
 
 function back($user, $bot_id, $message_id, $params)
 {
