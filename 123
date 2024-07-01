@@ -234,7 +234,8 @@ function back($user, $bot_id, $message_id, $params)
             break;
     }
 }
-А вот файл, откуда передаются данные:
+А вот файл, откуда передаются данные. А ещё при дебагинге в браузере, когда нажимаешь на ошибку указывает на строку xhr.send(JSON.stringify(data));.
+validatorframe.php:
 <?
 
 function writeToLog($data, $title = '')
