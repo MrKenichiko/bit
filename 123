@@ -1,25 +1,6 @@
 Это битрикс24. Чат-бот с приложением iframe. Здесь 2 файла: validatorframe.php(где само приложение iframe с опросом сотрудников) и index.php(Где сам чат-бот, настройки приложения  и прочая хрень). У меня есть код для передачи данных по кнопке отправить, где бот должен писать ответы пользователя в чат, но не пишет, что делать? Почини, пожалуйста. Доступа к логам и отладке нет!
 validatorframe.php:
 <?
-/*
-$_GET
-(
-    [BOT_ID] => 17
-    [BOT_CODE] => echoBot
-    [APP_ID] => 4
-    [APP_CODE] => echoFrame
-    [DOMAIN] => https://test.bitrix24.ru
-    [DOMAIN_HASH] => d1ab17949a572b0979d8db0d5b349cd2
-    [USER_ID] => 2
-    [USER_HASH] => 7e23ac8b6f6c7044076301c7f81cd745
-    [DIALOG_ID] => 950
-    [CONTEXT] => textarea
-    [LANG] => ru
-    [IS_CHROME] => Y
-    [MESSAGE_ID] => 12333
-    [BUTTON_PARAMS] => test
-)
- */
 
 function writeToLog($data, $title = '')
 {
@@ -322,20 +303,18 @@ securityCheck($_GET);
         }
     }
 
-    function sendAnswers() {
+
+
+function sendAnswers() {
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "index.php", true);
       xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       xhr.onreadystatechange = function () {
-        if (xhr.radyState === 4 && xhr.status === 200) {
+        if (xhr.readyState === 4 && xhr.status === 200) {
           console.log('Answers sent to server:', xhr.responseText);
         }
       };
-      const data = {
-        'answers': userAnswers,
-        'dialogId': '<?=$_GET['DIALOG_ID']?>',
-        'userId': '<?=$_GET['USER_ID']?>'
-      };
+
       xhr.send(JSON.stringify(data));
     }
 
@@ -481,6 +460,17 @@ else if ($_REQUEST['event'] == 'ONIMBOTDELETE') {
 }
 else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
+    if (isset($input['dialogId']) && isset($input['answers'])) {
+      $dialogId = $input['dialogId'];
+      $answers = implode("\n", $input['answers']);
+
+      $result = restCommand('imbot.message.add', Array(
+            "DIALOG_ID" => $dialogId,
+            "MESSAGE" => "Ответы пользователя:\n" . $answers,
+        ), $_REQUEST["auth"]);
+
+        echo json_encode($result);
+    }
     $answers = $input['answers'];
     $dialogId = $input['dialogId'];
     $userId = $input['userId'];
@@ -606,6 +596,7 @@ function writeToLog($data, $title = '')
     file_put_contents(__DIR__ . '/iframe.log', $log, FILE_APPEND);
     return true;
 }
+
 function welcom_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
 {
     $arKeyboard = array();
