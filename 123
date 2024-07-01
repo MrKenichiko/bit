@@ -1,4 +1,4 @@
-Это битрикс24. Чат-бот с приложением iframe. Здесь 2 файла: validatorframe.php(где само приложение iframe с опросом сотрудников) и index.php(Где сам чат-бот, настройки приложения  и прочая хрень). У меня есть код для передачи данных по кнопке отправить, где бот должен писать ответы пользователя в чат, но не пишет, что делать? Почини, пожалуйста.
+Это битрикс24. Чат-бот с приложением iframe. Здесь 2 файла: validatorframe.php(где само приложение iframe с опросом сотрудников) и index.php(Где сам чат-бот, настройки приложения  и прочая хрень). У меня есть код для передачи данных по кнопке отправить, где бот должен писать ответы пользователя в чат, но не пишет, что делать? Почини, пожалуйста. Доступа к логам и отладке нет!
 validatorframe.php:
 <?
 /*
@@ -256,7 +256,7 @@ securityCheck($_GET);
     }
     var surveyData = {};
     function nextQuestion(currentId, nextId, answer) {
-      userAnswers.push(answer);
+        userAnswers.push(answer);
         surveyData[currentId] = answer;
         var currentQuestion = document.getElementById(currentId);
         var nextQuestion = document.getElementById(nextId);
@@ -448,7 +448,8 @@ if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
     $msg = strtolower($_REQUEST['data']['PARAMS']['MESSAGE']);
 
     main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
-} elseif ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
+}
+else if ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
     if (!isset($_REQUEST['auth']['application_token'])) {
         return false;
     }
@@ -459,7 +460,26 @@ if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
                 break;
         }
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+}
+else if ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
+    // check the event - register this application or not
+    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
+        return false;
+    }
+    // send help message how to use chat-bot. For private chat and for group chat need send different instructions.
+    welcom_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+} // receive event "delete chat-bot"
+else if ($_REQUEST['event'] == 'ONIMBOTDELETE') {
+    // check the event - register this application or not
+    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
+        return false;
+    }
+    // unset application variables
+    unset($appsConfig[$_REQUEST['auth']['application_token']]);
+    // save params
+    saveParams($appsConfig);
+}
+else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $answers = $input['answers'];
     $dialogId = $input['dialogId'];
@@ -475,27 +495,10 @@ if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
         "MESSAGE" => $message
     ), $_REQUEST["auth"]);
 
-
     echo json_encode(array('status' => 'ok'));
     exit();
-} elseif ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
-    // check the event - register this application or not
-    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
-        return false;
-    }
-    // send help message how to use chat-bot. For private chat and for group chat need send different instructions.
-    welcom_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
-} // receive event "delete chat-bot"
-elseif ($_REQUEST['event'] == 'ONIMBOTDELETE') {
-    // check the event - register this application or not
-    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
-        return false;
-    }
-    // unset application variables
-    unset($appsConfig[$_REQUEST['auth']['application_token']]);
-    // save params
-    saveParams($appsConfig);
-} // receive event "Application install"
+}
+// receive event "Application install"
 else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
     // handler for events
     $handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'],
