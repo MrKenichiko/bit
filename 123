@@ -1,4 +1,4 @@
-Битрикс24. Каким образом нажав на Начать опрос открывается окно validatorframe.php? Если ссылки на кнопке на него нет. Как?
+Битрикс 24. Вардам survey_results.log приходит и там есть данные, а в result.log приходит NULL. Как исправить?
 <?php
 /**
  * Валидатор БОТ
@@ -60,7 +60,7 @@ else if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
   $postData = file_get_contents('php://input');
   $data = json_decode($postData, true);
-  if (isset($data['answers']) && isset($data['userId']) && isset($data['dialogId'])) {
+  if (isset($data['answers']) && isset($data['dialogId'])) {
     file_put_contents(__DIR__ . '/survey_results.log', print_r($data, true), FILE_APPEND);
     processSurveyData($data['botId'], $data['dialogId'], $data['answers']);
   }
@@ -199,14 +199,14 @@ function restCommand($method, $params, $auth = array())
 function processSurveyData($botId, $dialogId, $answers){
   $responseMessage = "Спасибо за прохождение опроса! Ваши ответы: " . implode(", ", $answers);
   $result = restCommand('imbot.message.add', array(
-    'BOT_ID' => 98,
+    'BOT_ID' => $botId,
     'DIALOG_ID' => $dialogId,
     'MESSAGE' => $responseMessage,
     'SYSTEM' => 'Y'
   ), $_REQUEST['auth']);
   writeVarDumpToFile($result, __DIR__ . '/results.log');
   restCommand('imbot.message.add', array(
-    'BOT_ID' => 98,
+    'BOT_ID' => $botId,
     'DIALOG_ID' => $dialogId,
     'MESSAGE' => $responseMessage,
     'SYSTEM' => 'Y'
@@ -225,7 +225,7 @@ function writeToLog($data, $title = '')
     return true;
 }
 
-function welcome_menu($user, $bot_id = 98, $message_id = 0, $app_id = 4)
+function welcome_menu($user, $message_id = 0, $app_id = 4)
 {
     $arKeyboard = array();
     $arKeyboard[] = array(
@@ -244,10 +244,9 @@ function welcome_menu($user, $bot_id = 98, $message_id = 0, $app_id = 4)
         'ATTACH' => '', // Вложение, необязательное поле
         "KEYBOARD" => $arKeyboard, // Клавиатура, необязательное поле
     ), $_REQUEST["auth"]);
-    writeVarDumpToFile($_REQUEST, __DIR__ . '/vardump112313.log');
 }
 
-function main_menu($user, $bot_id = 98, $message_id = 0, $app_id = 4)
+function main_menu($user, $message_id = 0, $app_id = 4)
 {
     $arKeyboard = array();
     $arKeyboard[] = array(
@@ -266,16 +265,4 @@ function main_menu($user, $bot_id = 98, $message_id = 0, $app_id = 4)
         "KEYBOARD" => $arKeyboard,
     ), $_REQUEST["auth"]);
     return $result;
-}
-
-function back($user, $bot_id = 98, $message_id, $params)
-{
-    include 'db.php';
-    switch ($params) {
-        default:
-            //главное меню
-            $arResult = main_menu($user, $bot_id, $message_id);
-            $arResult1 = welcome_menu($user, $bot_id, $message_id);
-            break;
-    }
 }
