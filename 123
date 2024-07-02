@@ -1,4 +1,5 @@
 Вот код бота(Битрикс24):
+Как сделать чтобы он выводил на 123 слово верно?
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
