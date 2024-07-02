@@ -1,250 +1,701 @@
-Вот код бота(Битрикс24):
-Как сделать чтобы он выводил на 123 слово верно?
+Это битрикс 24. Задача тебе:
+Удали все команды и прочую ненужную хрень. Добавь приветственное сообщение и ответ на слово пользователя "Тест". Отвечать будет выводом:
+"[B]Уважаемый коллега! Мы очень рады, что Вы становитесь частью большого коллектива АО «РЕШЕТНЁВ»![/B][BR]Предлагаем Вам ответить на несколько вопросов анкеты. Это поможет нам улучшить обстановку в коллективе, сделать её комфортнее и благоприятнее. Ваше мнение очень важно для нас!";
+И ниже кнопка "Начать опрос". Больше мне пока что в этом боте ничего не нужно, действуй!
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-session_start();
 /**
- * Валидатор БОТ
+ * Simple and handy reporting chatbot for bitrix24
  */
-// require "extranet.php";
+
+#file_put_contents("/tmp/BITRIX_testbot.log", json_encode($_REQUEST));
 
 $appsConfig = array();
-$configFileName = '/config_' . trim(str_replace('.', '_', $_REQUEST['auth']['domain'])) . '.php';
+$configFileName = "/config_" . trim(str_replace(".", "_", $_REQUEST["auth"]["domain"])) . ".php";
 if (file_exists(__DIR__ . $configFileName)) {
     include_once __DIR__ . $configFileName;
 }
-function writeVarDumpToFile($data, $filename) {
-  ob_start();
 
-  var_dump($data);
-
-  $output = ob_get_clean();
-
-  file_put_contents($filename, $output, FILE_APPEND);
-}
-writeVarDumpToFile($_REQUEST, __DIR__ . '/vardump.log');
 // receive event "new message for bot"
-if ($_REQUEST['event'] == 'ONIMBOTMESSAGEADD') {
+if ($_REQUEST["event"] == "ONIMBOTMESSAGEADD") {
+    {
+        $arReport = getAnswer($_REQUEST['data']['PARAMS']['MESSAGE'], $_REQUEST["auth"]);
+        $arReport = getAnswer2($_REQUEST['data']['PARAMS']['MESSAGE'], $_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+        $arReport['attach'][] = array("MESSAGE" => 't [send=h]h[/send]');
+        $result = restCommand('imbot.message.add',
+            array(
+                "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+                "MESSAGE" => $arReport['title'] . "\n" . $arReport['report'] . "\n",
+                "ATTACH" => array_merge(
+                    $arReport['attach']
+                ),
+            ),
+            $_REQUEST["auth"]);}
 
-    if (!isset($_REQUEST['auth']['application_token'])) {
-        return false;
-    }
+    $latency = (time() - $_REQUEST['ts']);
+    $latency = $latency > 60 ? (round($latency / 60)) . 'мин.' : $latency . "сек.";
+    {
 
-    $msg = strtolower($_REQUEST['data']['PARAMS']['MESSAGE']);
+        if ($_REQUEST['data']['PARAMS']['DIALOG_ID']) {
+            list($message) = explode(" ", $_REQUEST['data']['PARAMS']['MESSAGE']);
+            if ($message == '1') {
+                $result = restCommand('imbot.message.add', array(
+                    "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+                    "MESSAGE" => 'Тестовый бот',
+                ), $_REQUEST["auth"]);
+            } else if ($message == '2') {
+                $result = restCommand('imbot.message.add', array(
+                    "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+                    "MESSAGE" => 'Техподдержка',
+                ), $_REQUEST["auth"]);
+            }
 
-    main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
-}
-else if ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
-    if (!isset($_REQUEST['auth']['application_token'])) {
-        return false;
-    }
+        } else {
+            // ответное сообщение
+            $result = restCommand('imbot.message.add', array(
+                "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+                "MESSAGE" => "Ответная форма.",
+                "ATTACH" => array(
+                    array("MESSAGE" => "Ваш запрос: " . $_REQUEST['data']['PARAMS']['MESSAGE']),
+                    array("MESSAGE" => "Время обработки запроса: " . $latency),
+                ),
+            ), $_REQUEST["auth"]);
+        }}
+
+    $arResult = main_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+    return true;
+    $arResult = b24BadTasks($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+    return true;
+} else if ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
 
     foreach ($_REQUEST['data']['COMMAND'] as $command) {
-        switch ($command['COMMAND']) {
-            default:
-                break;
+
+        if ($command['COMMAND'] == 'TESTBOT_BUTTON2') {
+            $result = restCommand('imbot.message.add',
+                array(
+                    "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+                    "MESSAGE" => "кнопка2",
+                    "KEYBOARD" => array(
+                        array(
+                            "TEXT" => "Подробнее",
+                            "COMMAND" => "TESTBOT_BUTTON3",
+                            "BG_COLOR" => "#D7FAF9",
+                            "TEXT_COLOR" => "#000000",
+                            "DISPLAY" => "BLOCK",
+                            "BLOCK" => "Y",
+                        ),
+                    ),
+                ),
+                $_REQUEST["auth"]);
+        }
+
+        if ($command['COMMAND'] == 'APP') {
+            $result = restCommand('imbot.message.add',
+                array(
+                    "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+                    "MESSAGE" => "APP",
+                    "KEYBOARD" => $keyboard,
+
+                ),
+                $_REQUEST["auth"]);
+        }
+
+        if ($command['COMMAND'] == 'TESTBOT_BUTTON3') {
+            $result = restCommand('imbot.message.add',
+                array(
+                    "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+                    "MESSAGE" => "http://bitrix24.ru",
+                ),
+                $_REQUEST["auth"]);
+        }
+
+        if ($command['COMMAND'] == 'echo') {
+            $result = restCommand('imbot.command.answer', array(
+                "COMMAND_ID" => $command['COMMAND_ID'],
+                "MESSAGE_ID" => $command['MESSAGE_ID'],
+                "MESSAGE" => "test",
+                "ATTACH" => array(
+                    array("MESSAGE" => "Ваш запрос: " . $_REQUEST['data']['PARAMS']['MESSAGE']),
+                    array("MESSAGE" => "Время обработки запроса: " . $latency),
+                ),
+            ), $_REQUEST["auth"]);
+        } else if ($command['COMMAND'] == 'echoList') {
+            $initList = false;
+            if (!$command['COMMAND_PARAMS']) {
+                $initList = true;
+                $command['COMMAND_PARAMS'] = 1;
+            }
+
+            $attach = array();
+            if ($command['COMMAND_PARAMS'] == 1) {
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Красный", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#df532d", "COLOR" => "#df532d", "DISPLAY" => "LINE"),
+                ));
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Серый", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#3a403e", "COLOR" => "#3a403e", "DISPLAY" => "LINE"),
+                ));
+            } else if ($command['COMMAND_PARAMS'] == 2) {
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Мятный", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#4ba984", "COLOR" => "#4ba984", "DISPLAY" => "LINE"),
+                ));
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Голубой", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#6fc8e5", "COLOR" => "#6fc8e5", "DISPLAY" => "LINE"),
+                ));
+            } else if ($command['COMMAND_PARAMS'] == 3) {
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Фиолетовый", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#8474c8", "COLOR" => "#8474c8", "DISPLAY" => "LINE"),
+                ));
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Бирюзовый", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#1eb4aa", "COLOR" => "#1eb4aa", "DISPLAY" => "LINE"),
+                ));
+            } else if ($command['COMMAND_PARAMS'] == 4) {
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Розовый", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#e98fa6", "COLOR" => "#e98fa6", "DISPLAY" => "LINE"),
+                ));
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Зеленый", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#85cb7b", "COLOR" => "#85cb7b", "DISPLAY" => "LINE"),
+                ));
+            } else if ($command['COMMAND_PARAMS'] == 5) {
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Синий", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#29619b", "COLOR" => "#29619b", "DISPLAY" => "LINE"),
+                ));
+                $attach[] = array("GRID" => array(
+                    array("VALUE" => "Оранжевый", "DISPLAY" => "LINE", "WIDTH" => 100),
+                    array("VALUE" => "#e8a441", "COLOR" => "#e8a441", "DISPLAY" => "LINE"),
+                ));
+            }
+            $keyboard = array(
+                array("TEXT" => $command['COMMAND_PARAMS'] == 1 ? "· 1 ·" : "1", "COMMAND" => "echoList", "COMMAND_PARAMS" => "1", "DISPLAY" => "LINE", "BLOCK" => "Y"),
+                array("TEXT" => $command['COMMAND_PARAMS'] == 2 ? "· 2 ·" : "2", "COMMAND" => "echoList", "COMMAND_PARAMS" => "2", "DISPLAY" => "LINE", "BLOCK" => "Y"),
+                array("TEXT" => $command['COMMAND_PARAMS'] == 3 ? "· 3 ·" : "3", "COMMAND" => "echoList", "COMMAND_PARAMS" => "3", "DISPLAY" => "LINE", "BLOCK" => "Y"),
+                array("TEXT" => $command['COMMAND_PARAMS'] == 4 ? "· 4 ·" : "4", "COMMAND" => "echoList", "COMMAND_PARAMS" => "4", "DISPLAY" => "LINE", "BLOCK" => "Y"),
+                array("TEXT" => $command['COMMAND_PARAMS'] == 5 ? "· 5 ·" : "5", "COMMAND" => "echoList", "COMMAND_PARAMS" => "5", "DISPLAY" => "LINE", "BLOCK" => "Y"),
+            );
+
+            if (!$initList && $command['COMMAND_CONTEXT'] == 'KEYBOARD') {
+                $result = restCommand('imbot.message.update', array(
+                    "BOT_ID" => $command['BOT_ID'],
+                    "MESSAGE_ID" => $command['MESSAGE_ID'],
+                    "ATTACH" => $attach,
+                    "KEYBOARD" => $keyboard,
+                ), $_REQUEST["auth"]);
+            } else {
+                $result = restCommand('imbot.command.answer', array(
+                    "COMMAND_ID" => $command['COMMAND_ID'],
+                    "MESSAGE_ID" => $command['MESSAGE_ID'],
+                    "MESSAGE" => "Вариант оформления",
+                    "ATTACH" => $attach,
+                    "KEYBOARD" => $keyboard,
+                ), $_REQUEST["auth"]);
+            }
+        } else if ($command['COMMAND'] == 'help') {
+            $keyboard = array(
+                array("TEXT" => "Назад", "COMMAND" => "back", "COMMAND_PARAMS" => "TESTBOT_BUTTON2", "BG_COLOR" => "#29619b",
+                    "TEXT_COLOR" => "#fff", "DISPLAY" => "LINE"),
+                array(
+                    "TEXT" => "Вернуться на сайт Bitrix",
+                    'LINK' => "http://bitrix24.iss-reshetnev.ru",
+                    "BG_COLOR" => "#29616b",
+                    "TEXT_COLOR" => "#fff",
+                    "DISPLAY" => "LINE",
+                ),
+                array("TYPE" => "NEWLINE"),
+                array("TEXT" => "Echo", "COMMAND" => "echo", "COMMAND_PARAMS" => "test", "DISPLAY" => "LINE"),
+            );
+
+            $result = restCommand('imbot.command.answer', array(
+                "COMMAND_ID" => $command['COMMAND_ID'],
+                "MESSAGE_ID" => $command['MESSAGE_ID'],
+                "MESSAGE" => "Привет! Я тестовый бот :)[br] Я создан для того, чтобы ответить на ваши вопросы!",
+                "KEYBOARD" => $keyboard,
+            ), $_REQUEST["auth"]);
         }
     }
-}
-else if ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
-    // check the event - register this application or not
-    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
-        return false;
-    }
-    // send help message how to use chat-bot. For private chat and for group chat need send different instructions.
-    welcom_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
-} // receive event "delete chat-bot"
-else if ($_SERVER['REQUEST_METHOD'] == 'POST')
-{
+} else if ($_REQUEST["event"] == "ONIMBOTMESSAGEADD") {
 
-  $postData = file_get_contents('php://input');
-  $data = json_decode($postData, true);
-  if (isset($data['answers']) && isset($data['userId']) && isset($data['dialogId'])) {
-    file_put_contents(__DIR__ . '/survey_results.log', print_r($data, true), FILE_APPEND);
-    processSurveyData($data['userId'], $data['dialogId'], $data['answers']);
-  }
-}
-else if ($_REQUEST['event'] == 'ONIMBOTDELETE') {
-    // check the event - register this application or not
-    if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
-        return false;
-    }
-    // unset application variables
-    unset($appsConfig[$_REQUEST['auth']['application_token']]);
+    // неустановленные переменные приложения
+    unset($appsConfig[$_REQUEST["auth"]["application_token"]]);
     // save params
     saveParams($appsConfig);
-}
-// receive event "Application install"
-else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
-    // handler for events
-    $handlerBackUrl = ($_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . (in_array($_SERVER['SERVER_PORT'],
-        array(80, 443)) ? '' : ':' . $_SERVER['SERVER_PORT']) . $_SERVER['SCRIPT_NAME'];
-    $result = restCommand('imbot.register', array(
-        'CODE' => 'ValidatorBot',
-        // строковой идентификатор бота, уникальный в рамках вашего приложения (обяз.)
-        'TYPE' => 'B',
-        // Тип бота, B - бот, ответы  поступают сразу, H - человек, ответы поступаю с задержкой от 2х до 10 секунд
+} else if ($_REQUEST["event"] == "ONAPPINSTALL") {
+    // обработчик событий
+    $handlerBackUrl = ($_SERVER["SERVER_PORT"] == 443 ? "https" : "http") . "://" . $_SERVER["SERVER_NAME"] . (in_array($_SERVER["SERVER_PORT"],
+        array(80, 443)) ? "" : ":" . $_SERVER["SERVER_PORT"]) . $_SERVER["SCRIPT_NAME"];
+
+    $result = restCommand('imbot.app.register', array(
+
+        'CODE' => 'index', // Код приложения для чата
         'EVENT_MESSAGE_ADD' => $handlerBackUrl,
-        'EVENT_JOIN_CHAT' => $handlerBackUrl,
         // Ссылка на обработчик события отправки сообщения боту (обяз.)
         'EVENT_WELCOME_MESSAGE' => $handlerBackUrl,
         // Ссылка на обработчик события открытия диалога с ботом или приглашения его в групповой чат (обяз.)
         'EVENT_BOT_DELETE' => $handlerBackUrl,
         // Ссылка на обработчик события удаление бота со стороны клиента (обяз.)
-        'PROPERTIES' => array( // Личные данные чат-бота (обяз.)
-            'NAME' => 'Валидатор БОТ',
-            // Имя бота (обязательное одно из полей NAME или LAST_NAME)
-            'LAST_NAME' => '',
-            // Фамилия бота (обязательное одно из полей NAME или LAST_NAME)
-            'COLOR' => 'AQUA',
-            // Цвет бота для мобильного приложения RED,  GREEN, MINT, LIGHT_BLUE, DARK_BLUE, PURPLE, AQUA, PINK, LIME, BROWN,  AZURE, KHAKI, SAND, MARENGO, GRAY, GRAPHITE
-            'EMAIL' => 'validatorno@mail.com',
-            // Емейл для связи
-            'PERSONAL_BIRTHDAY' => '2016-03-23',
-            // День рождения в формате YYYY-mm-dd
-            'WORK_POSITION' => 'Бот',
-            // Занимаемая должность, используется как описание бота
-            'PERSONAL_WWW' => '',
-            // Ссылка на сайт
-            'PERSONAL_GENDER' => 'M',
-            // Пол бота, допустимые значения M -  мужской, F - женский, пусто если не требуется указывать
+        'JS_METHOD' => 'SEND',
+        'JS_PARAM' => '/help',
+        'ICON_FILE' => base64_encode(file_get_contents(__DIR__ . '/reshetnev_icon.png')), // Иконка в base64
+        'CONTEXT' => 'BOT', // Контекст приложения
+        'EXTRANET_SUPPORT' => 'N', // Доступна ли команда пользователям экстранет, по умолчанию N
+        'LIVECHAT_SUPPORT' => 'N', // Поддержка онлайн-чата
+        'IFRAME_POPUP' => 'Y', // iframe будет открыт с возможностью перемещения внутри мессенджера, переход между диалогами не будет закрывать такое окно.
+        'LANG' => array( // Массив переводов, желательно указывать как минимум для RU и EN
+            array('LANGUAGE_ID' => 'en', 'TITLE' => 'bot BUTTON', 'DESCRIPTION' => 'Send help command'),
         ),
     ), $_REQUEST["auth"]);
-    $botId = $result['result'];
 
+    // register new bot
     $result = restCommand('imbot.app.register', array(
-         'BOT_ID' => $botId, // Идентификатор бота владельца приложения для чата
-         'CODE' => 'validator', // Код приложения для чата
-         'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php',
-         'IFRAME_WIDTH' => '1600px', // Желаемая ширина фрейма. Минимальное значение - 250px
-         'IFRAME_HEIGHT' => '900px', // Желаемая высота фрейма. Минимальное значение - 50px
-         'HASH' => 'd1ab17949a572b0979d8db0d5b349cd2', // Токен для доступа к вашему фрейму для проверки подписи, 32 символа.
-         'ICON_FILE' => 'iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89', // Иконка в base64
-         'CONTEXT' => 'BOT', // Контекст
-         'HIDDEN' => 'Y', // Скрытое приложение или нет
-         'EXTRANET_SUPPORT' => 'N', // Доступна ли команда пользователям экстранет, по умолчанию N
-         'LIVECHAT_SUPPORT' => 'N', // Поддержка онлайн-чата
-         'IFRAME_POPUP' => 'Y', // iframe будет открыт с возможностью перемещения внутри мессенджера, переход между диалогами не будет закрывать такое окно.
-         'LANG' => array( // Массив переводов, желательно указывать как минимум для RU и EN
-             array('LANGUAGE_ID' => 'en', 'TITLE' => 'Validator', 'DESCRIPTION' => 'Open Validator', 'COPYRIGHT' => 'Bitrix24'),
-             array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Валидатор', 'DESCRIPTION' => 'Открыть Валидатор', 'COPYRIGHT' => 'Bitrix24'),
-         ),
+        'CODE' => 'index',
+        'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/testbot/iframe.php',
+        'IFRAME_WIDTH' => '350', // Желаемая ширина фрейма. Минимальное значение - 250px
+        'IFRAME_HEIGHT' => '150', // Желаемая высота фрейма. Минимальное значение - 50px
+        'HASH' => 'd1ab17949a572b0979d8db0d5b349cd2', // Токен для доступа к вашему фрейму для проверки подписи, 32 символа.
+        'ICON_FILE' => base64_encode(file_get_contents(__DIR__ . '/reshetnev_icon.png')), // Иконка в base64
+        'CONTEXT' => 'BOT', // Контекст
+        'HIDDEN' => 'N', // Скрытое приложение или нет
+        'EXTRANET_SUPPORT' => 'N', // Доступна ли команда пользователям экстранет, по умолчанию N
+        'LIVECHAT_SUPPORT' => 'N', // Поддержка онлайн-чата
+        'IFRAME_POPUP' => 'N', // iframe будет открыт с возможностью перемещения внутри мессенджера, переход между диалогами не будет закрывать такое окно.
+        'LANG' => array( // Массив переводов, желательно указывать как минимум для RU и EN
+            array('LANGUAGE_ID' => 'en', 'T
+			   TITLE' => 'bot IFRAME', 'DESCRIPTION' => 'Open bot IFRAME app', 'COPYRIGHT' => 'Bitrix24'),
+        ),
+    ), $_REQUEST["auth"]);
+
+    $result = restCommand('imbot.app.unregister', array(
+        'APP_ID' => 13, // Идентификатор команды для удаления
     ), $_REQUEST["auth"]);
 
     $result = restCommand('imbot.app.update', array(
-
-        'APP_ID' => 4,
+        'APP_ID' => 13, // Идентификатор чата
         'FIELDS' => array(
-             'LANG' => array(
-			 	          array('LANGUAGE_ID' => 'en', 'TITLE' => 'Validator', 'DESCRIPTION' => 'Open Validator', 'COPYRIGHT' => 'Bitrix24'),
-			 	          array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Валидатор', 'DESCRIPTION' => 'Открыть Валидатор', 'COPYRIGHT' => 'Bitrix24'),
-			       ),
-			       'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php'
+            'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/testbot/iframe.php',
+            'IFRAME_WIDTH' => '350', // Желаемая ширина фрейма. Минимальное значение - 250px
+            'IFRAME_HEIGHT' => '150', // Желаемая высота фрейма. Минимальное значение - 50px
+            'HASH' => 'register', // Токен для доступа к вашему фрейму, 32 символа.
+            'ICON_FILE' => base64_encode(file_get_contents(__DIR__ . '/reshetnev_icon.png')), // Иконка в base64
+            'JS_METHOD' => 'SEND',
+            'JS_PARAM' => '/help',
+            'CONTEXT' => 'BOT', // Контекст приложения
+            'EXTRANET_SUPPORT' => 'N', // Доступна ли команда пользователям экстранет, по умолчанию N
+            'LIVECHAT_SUPPORT' => 'N', // Поддержка онлайн-чата
+            'IFRAME_POPUP' => 'N', // iframe будет открыт с возможностью перемещения внутри мессенджера, переход между диалогами не будет закрывать такое окно
+            'LANG' => array( // Массив переводов, желательно указывать как минимум для RU и EN
+                array('LANGUAGE_ID' => 'en', 'TITLE' => 'bot IFRAME', 'DESCRIPTION' => 'Open bot IFRAME app', 'COPYRIGHT' => 'Bitrix24'),
+            ),
         ),
-   ), $_REQUEST["auth"]);
-}
+    ), $_REQUEST["auth"]);
 
+    $result = restCommand('imbot.command.register', array(
+        'COMMAND' => 'echo',
+        'COMMON' => 'Y',
+        'HIDDEN' => 'N',
+        'EXTRANET_SUPPORT' => 'N',
+        'LANG' => array(
+            array('LANGUAGE_ID' => 'en', 'TITLE' => 'Get echo message', 'PARAMS' => 'some text'),
+        ),
+        'EVENT_COMMAND_ADD' => $handlerBackUrl,
+    ), $_REQUEST["auth"]);
+    $commandEcho = $result['result'];
+
+    $result = restCommand('imbot.command.register', array(
+        'COMMAND' => 'echoList',
+        'COMMON' => 'N',
+        'HIDDEN' => 'N',
+        'EXTRANET_SUPPORT' => 'N',
+        'LANG' => array(
+            array('LANGUAGE_ID' => 'en', 'TITLE' => 'Варианты оформления', 'PARAMS' => ''),
+        ),
+        'EVENT_COMMAND_ADD' => $handlerBackUrl,
+    ), $_REQUEST["auth"]);
+    $commandList = $result['result'];
+
+    $result = restCommand('imbot.command.register', array(
+        'COMMAND' => 'menu',
+        'COMMON' => 'N',
+        'HIDDEN' => 'N',
+        'EXTRANET_SUPPORT' => 'N',
+        'LANG' => array(
+            array('LANGUAGE_ID' => 'en', 'TITLE' => 'menu', 'PARAMS' => ''),
+        ),
+        'EVENT_COMMAND_ADD' => $handlerBackUrl,
+    ), $_REQUEST["auth"]);
+    $commandMenu = $result['result'];
+
+    $result = restCommand('imbot.command.register', array(
+        'COMMAND' => 'help',
+        'COMMON' => 'N',
+        'HIDDEN' => 'N',
+        'EXTRANET_SUPPORT' => 'N',
+        'LANG' => array(
+            array('LANGUAGE_ID' => 'en', 'TITLE' => 'Техподдержка', 'PARAMS' => 'some text'),
+        ),
+        'EVENT_COMMAND_ADD' => $handlerBackUrl,
+    ), $_REQUEST["auth"]);
+    $commandHelp = $result['result'];
+
+    $result = restCommand('imbot.command.register', array(
+        'COMMAND' => 'app',
+        'COMMON' => 'N',
+        'HIDDEN' => 'N',
+        'EXTRANET_SUPPORT' => 'N',
+        'LANG' => array(
+            array('LANGUAGE_ID' => 'en', 'TITLE' => 'app', 'PARAMS' => ''),
+        ),
+        'EVENT_COMMAND_ADD' => $handlerBackUrl,
+    ), $_REQUEST["auth"]);
+    $commandApp = $result['result'];
+
+    //кнопка TESTBOT_BUTTON1
+    $result = restCommand('imbot.command.register', array(
+
+        'COMMAND' => 'TESTBOT_BUTTON1',
+        'COMMON' => 'N',
+        'HIDDEN' => 'Y',
+        'EXTRANET_SUPPORT' => 'N',
+        'LANG' => array(
+            array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Кнопка TESTBOT_BUTTON1', 'PARAMS' => ''),
+        ),
+        'EVENT_COMMAND_ADD' => $handlerBackUrl,
+    ), $_REQUEST["auth"]);
+    $test_btn_1_cmd = $result['result'];
+
+    // save params
+    $appsConfig[$_REQUEST['auth']['application_token']] = array(
+
+        'COMMAND_ECHO' => $commandEcho,
+        'COMMAND_LIST' => $commandList,
+        'COMMAND_HELP' => $commandHelp,
+
+        'COMMAND_MENU' => $commandMenu,
+        'COMMAND_APP' => $commandApp,
+        'TESTBOT_BUTTON1' => $test_btn_1_cmd,
+        'LANGUAGE_ID' => $_REQUEST['data']['LANGUAGE_ID'],
+        'AUTH' => $_REQUEST['auth'],
+    );
+    saveParams($appsConfig);
+
+}
+/**
+ * Save application configuration.
+ *
+ * @param $params
+ *
+ * @return bool
+ */
 function saveParams($params)
 {
     $config = "<?php\n";
     $config .= "\$appsConfig = " . var_export($params, true) . ";\n";
     $config .= "?>";
-    $configFileName = '/config_' . trim(str_replace('.', '_', $_REQUEST['auth']['domain'])) . '.php';
+    $configFileName = "/config_" . trim(str_replace(".", "_", $_REQUEST["auth"]["domain"])) . ".php";
     file_put_contents(__DIR__ . $configFileName, $config);
     return true;
 }
-
-function restCommand($method, $params, $auth = array())
+/**
+ * Send rest query to Bitrix24.
+ *
+ * @param         $method - Rest method, ex: methods
+ * @param array $params - Method params, ex: array()
+ * @param array $auth    - Authorize data, ex: array("domain" => "https://test.bitrix24.com", "access_token" => "7inpwszbuu8vnwr5jmabqa467rqur7u6")
+ *
+ * @return mixed
+ */
+function restCommand($method, array $params = array(), array $auth = array())
 {
-  $queryUrl = 'https://' .$_REQUEST['auth']['domain'].'/rest/'.$method;
-  $queryData = http_build_query(array_merge($params, array('auth' => $_REQUEST['auth']['access_token'])));
-
-  $curl = curl_init();
-  curl_setopt_array($curl, array(
-    CURLOPT_POST => 1,
-    CURLOPT_HEADER => 0,
-    CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_URL => $queryUrl,
-    CURLOPT_POSTFIELDS => $queryData,
-  ));
-  $result = curl_exec($curl);
-  curl_close($curl);
-
-  return json_decode($result, true);
-}
-
-function processSurveyData($userId, $dialogId, $answers){
-  $responseMessage = "Спасибо за прохождение опроса! Ваши ответы: " . implode(", ", $answers);
-  restCommand('imbot.message.add', array(
-    'DIALOG_ID' => $dialogId,
-    'MESSAGE' => $responseMessage,
-    'SYSTEM' => 'Y'
-  ), $_REQUEST['auth']);
-}
-
-function writeToLog($data, $title = '')
-{
-    $log = "\n------------------------\n";
-    $log .= date("Y.m.d G:i:s") . "\n";
-    $log .= (strlen($title) > 0 ? $title : 'DEBUG') . "\n";
-    $log .= print_r($data, 1);
-    $log .= "\n------------------------\n";
-    file_put_contents(__DIR__ . '/iframe.log', $log, FILE_APPEND);
-    return true;
-}
-
-function welcom_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
-{
-    $arKeyboard = array();
-    $arKeyboard[] = array(
-        "TEXT" => "Начать опрос",
-        "BLOCK" => "Y",
-        "APP_ID" => $app_id,
-        "BG_COLOR" => "#D7FAF9",
-        "TEXT_COLOR" => "#000000",
-    );
-
-    $message = "[B]Уважаемый коллега! Мы очень рады, что Вы становитесь частью большого коллектива АО «РЕШЕТНЁВ»![/B][BR]Предлагаем Вам ответить на несколько вопросов анкеты. Это поможет нам улучшить обстановку в коллективе, сделать её комфортнее и благоприятнее. Ваше мнение очень важно для нас!";
-
-    $result = restCommand('imbot.message.add', array(
-        "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
-        'MESSAGE' => $message, // Тест сообщения
-        'ATTACH' => '', // Вложение, необязательное поле
-        "KEYBOARD" => $arKeyboard, // Клавиатура, необязательное поле
-    ), $_REQUEST["auth"]);
-}
-
-function main_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
-{
-    $arKeyboard = array();
-    $arKeyboard[] = array(
-        "TEXT" => "Начать опрос",
-        "BLOCK" => "Y",
-        "APP_ID" => $app_id,
-        "BG_COLOR" => "#D7FAF9",
-        "TEXT_COLOR" => "#000000",
-    );
-
-    $message = "[B]Уважаемый коллега! Мы очень рады, что Вы становитесь частью большого коллектива АО «РЕШЕТНЁВ»![/B][BR]Предлагаем Вам ответить на несколько вопросов анкеты. Это поможет нам улучшить обстановку в коллективе, сделать её комфортнее и благоприятнее. Ваше мнение очень важно для нас!";
-
-    $result = restCommand('imbot.message.add', array(
-        "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
-        "MESSAGE" => $message,
-        "KEYBOARD" => $arKeyboard,
-    ), $_REQUEST["auth"]);
+    $queryUrl = "https://" . $auth["domain"] . "/rest/" . $method;
+    $queryData = http_build_query(array_merge($params, array("auth" => $auth["access_token"])));
+    // writeToLog(array("URL" => $queryUrl, "PARAMS" => array_merge($params, array("auth" => $auth["access_token"]))), "ReportBot send data");
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_POST => 1,
+        CURLOPT_HEADER => 0,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_URL => $queryUrl,
+        CURLOPT_POSTFIELDS => $queryData,
+    ));
+    $result = curl_exec($curl);
+    curl_close($curl);
+    $result = json_decode($result, 1);
     return $result;
 }
 
-function back($user, $bot_id, $message_id, $params)
+/**
+ * Write data to log file.
+ *
+ * @param mixed  $data
+ * @param string $title
+ *
+ * @return bool
+ */
+function writeToLog($data, $title = "")
 {
-    include 'db.php';
-    switch ($params) {
-        default:
-            //главное меню
-            $arResult = main_menu($user, $bot_id, $message_id);
-            $arResult1 = welcom_menu($user, $bot_id, $message_id);
+    $log = "\n------------------------\n";
+    $log .= date("Y.m.d G:i:s") . "\n";
+    $log .= (strlen($title) > 0 ? $title : "DEBUG") . "\n";
+    $log .= print_r($data, 1);
+    $log .= "\n------------------------\n";
+    file_put_contents(__DIR__ . "/imbot.log", $log, FILE_APPEND);
+    return true;
+}
+/**
+ * Command received, create report
+ *
+ * @param        string $text message sent by user
+ * @param        int $user user ID
+ *
+ * @return      array
+ */
+
+function main_menu($user, $bot_id = 0, $message_id = 0)
+{
+    $arKeyboard = array();
+    $arKeyboard[] = array(
+        "TEXT" => "Создать заявку",
+        "COMMAND" => "question",
+        "BG_COLOR" => "#D7FAF9",
+        "TEXT_COLOR" => "#000000",
+        "DISPLAY" => "BLOCK",
+        "BLOCK" => "Y",
+    );
+    $arKeyboard[] = array(
+        "TEXT" => "Кнопка 1",
+        "COMMAND" => "TESTBOT_BUTTON2",
+        "BG_COLOR" => "#D7FAF9",
+        "TEXT_COLOR" => "#000000",
+        "DISPLAY" => "BLOCK",
+        "BLOCK" => "Y",
+    );
+
+    $arKeyboard[] = array(
+        "TEXT" => "Назад",
+        "COMMAND" => "BACK",
+        "COMMAND_PARAMS" => "",
+        "BG_COLOR" => "#D7FAF9",
+        "TEXT_COLOR" => "#000000",
+        "DISPLAY" => "BLOCK",
+        "BLOCK" => "Y",
+    );
+
+    $arKeyboard[] = array(
+        "TEXT" => "Open App",
+        "COMMAND" => "APP",
+        "APP_ID" => 11,
+        "BG_COLOR" => "#D7FAF9",
+        "TEXT_COLOR" => "#000000",
+        "DISPLAY" => "BLOCK",
+        "BLOCK" => "Y",
+    );
+
+    $message = '>> Чем могу помочь ?[br]' .
+        '[send=1]1. Больше о боте[/send][br]' .
+        '[send=2]2. Помощь[/send][br]' .
+        '[send=3]3. Подробнее[/send]';
+
+    $result = restCommand(
+        'imbot.message.add',
+        array(
+            "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+            "MESSAGE" => $message . "\n",
+            'KEYBOARD' => $arKeyboard,
+        ),
+        $_REQUEST["auth"]
+    );
+
+    return $result;
+}
+
+// Функция для того, чтобы задать вопрос и получить вводимые пользователем данные
+/*function question($questions,$answers)
+{
+$questions= array (
+"Какой у Вас инвентарный номер ?",
+"Напишите Ваше расположение",
+"Расскажите о проблеме ");
+$answers = array ();
+
+foreach ($questions as $question)
+{
+//бот задает вопрос
+echo $question."\n";
+//получаем ответ от пользователя
+$answer = readline("Ответ:");
+//сохраняем ответы
+$answers [] = $answer;
+}
+
+echo "\n Вы дали следующие ответы:\n";
+
+foreach ($answers as $index =>$answer )
+{
+echo $questions [$index].":". $answer. "\n";
+}
+}
+
+function create_accept($user, $bot_id, $message_id) {
+
+$arKeyboard = array();
+
+$arKeyboard[] = array(
+"TEXT" => "Главное меню",
+"COMMAND" => "BACK",
+"COMMAND_PARAMS" => "",
+"BG_COLOR" => "#D7FAF9",
+"TEXT_COLOR" => "#000000",
+"DISPLAY" => "BLOCK",
+"BLOCK" => "Y",
+);
+
+$result = prepared_query($user, json_encode($json), $user_dept, $user_info, "isis", true);
+$id = json_encode($result);
+$message = "Заявка сформирована.\nПо готовности вы получите уведомление.\nУзнать о статусе заявки можно в пункте меню [I][B]Проверить статус[/B][/I]";
+
+$result = restCommand('imbot.message.update', Array(
+'MESSAGE_ID' => $message_id,
+'MESSAGE' => $message,
+'KEYBOARD' => $arKeyboard,
+), $_REQUEST["auth"]);
+
+send_message_to_group($bot_id, "Создана заявка [B]Справка [/B]:[BR]".$metadata->{'fio'}." (".$metadata->{'dept'}."),[BR]за ".$metadata->{'year'}." год.","ndfl", $id, "Справки 2-НДФЛ", "/NDFL_STATUS");
+
+return $result;
+}
+
+function create ($user, $bot_id, $message_id) {
+$arKeyboard = array();
+$arKeyboard[] = array(
+"TEXT" => "Отменить создание заявки",
+"COMMAND" => "BACK",
+"COMMAND_PARAMS" => "main_menu",
+"BG_COLOR" => "#C80000",
+"TEXT_COLOR" => "#FFFFFF",
+"DISPLAY" => "LINE",
+"BLOCK" => "Y",
+);
+
+$message = "";
+$footer = "";
+
+$user_info = restCommand('imbot.user.get', Array(
+"id": 5,
+"name": "Евгений Шеленков",
+"first_name": "Евгений",
+"last_name": "Шеленков",
+), $_REQUEST["auth"]);
+
+$user_dept_id = $user_info['result']['departments'][0];
+
+$user_dept = restCommand('imbot.department.get', Array(
+"id": 51,
+"name": "Московский филиал",
+), $_REQUEST["auth"]);
+
+$message = "Сотрудник: [B]" ff "[/B],\n";
+$message .= "подразделение: [B]" a "[/B],\n";
+$message .= "какой год: [B]" d "[/B].\n";
+$footer = "\nБудет сформирована заявка н[U]uuuu[/U].\nПродолжить?";
+
+$json = array(
+"service" => "main_menu",
+"message_id" => $message_id,
+"year" =>  $message,
+"dept" => $user_dept['result'][0]['name'],
+"fio" => $user_info['result']['name'],
+);
+
+$arKeyboard[] = array(
+"TEXT" => "Создать заявку",
+"COMMAND" => "CREATE_ACCEPT",
+"COMMAND_PARAMS" => json_encode($json),
+"BG_COLOR" => "#488801",
+"TEXT_COLOR" => "#FFFFFF",
+"DISPLAY" => "LINE",
+"BLOCK" => "Y",
+);
+}
+
+else {
+//новое сообщение
+//добавить данные в бд
+$json = array(
+"service" => "main_menu",
+"message_id" => $message_id,
+"year" => "",
+);
+
+$message = "Отправьте сообщение боту, с указанием";
+}
+
+$result = restCommand('imbot.message.update', Array(
+'MESSAGE_ID' => $message_id,
+'MESSAGE' => $message,
+'KEYBOARD' => $arKeyboard,
+), $_REQUEST["auth"]);
+
+return $result;
+}
+ */
+function getAnswer2($command = '', $user)
+{
+
+    switch (strtolower($command)) {
+        case 'Начать':
+            $arResult = b24BadTasks2($user);
             break;
     }
+    return $arResult;
+}
+
+function b24BadTasks2()
+{
+    $message = "Приветствую";
+    $result = restCommand(
+        'imbot.message.add',
+        array(
+            "DIALOG_ID" => $_REQUEST['data']['PARAMS']['DIALOG_ID'],
+            "MESSAGE" => $message,
+            "KEYBOARD" => "",
+        ),
+        $_REQUEST["auth"]
+    );}
+
+function getAnswer($command = '', $user)
+{
+
+    switch (strtolower($command)) {
+        case '3':
+            $arResult = b24BadTasks($user);
+            break;
+    }
+    return $arResult;
+}
+
+function b24BadTasks($questions)
+{
+    $questions = array(
+        "Какой у Вас инвентарный номер ?",
+        "Напишите Ваше расположение",
+        "Расскажите о проблеме ");
+    $answers = array();
+
+    foreach ($questions as $question) {
+        //бот задает вопрос
+        echo $question . "\n";
+        //получаем ответ от пользователя
+        $answer = readline("Ответ:");
+        //сохраняем ответы
+        $answers[] = $answer;
+    }
+
+    // обработка полученных ответов
+
+    return $answers;
 }
