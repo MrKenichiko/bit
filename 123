@@ -1,3 +1,4 @@
+Битрикс 24. Исправь
 /bots/validatorbot/validatorframe.php?BOT_ID=9364&BOT_CODE=ValidatorBot&APP_ID=4&APP_CODE=validator&DOMAIN=https%3A%2F%2Fbitrix24.iss-reshetnev.ru&DOMAIN_HASH=50f2bd08cbc3d9c7bc8becc2159459f4&USER_ID=9724&USER_HASH=833916cf01b1ec289f44d952cf8b99b2&DIALOG_ID=9364&DIALOG_CONTEXT=user&DIALOG_ENTITY_ID=&DIALOG_ENTITY_DATA_1=&LANG=ru&IS_CHROME=Y&CONTEXT=button&DARK_MODE=N&MESSAGE_ID=670849&BUTTON_PARAMS=%5Bobject%20Object%5D&:1 An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
 <?php
 session_start();
