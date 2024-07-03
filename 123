@@ -61,13 +61,13 @@ else if ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
 } // receive event "delete chat-bot"
 else if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
-
+  global $dialog_id;
   $postData = file_get_contents('php://input');
   $data = json_decode($postData, true);
   if (isset($data['answers']) && isset($data['dialogId'])) {
     file_put_contents(__DIR__ . '/survey_results.log', print_r($data, true), FILE_APPEND);
     echo json_encode(['status' => 'success', 'message' => 'Data received']);
-    $res = processSurveyData($_REQUEST['data']['PARAMS']['FROM_USER_ID'], $data['botId'], $data['answers']);
+    $res = processSurveyData($_REQUEST['data']['PARAMS']['FROM_USER_ID'], $data['dialogId'], $data['answers']);
     writeVarDumpToFile($res, __DIR__ . '/res.log');
   } else {
     http_response_code(400);
@@ -265,9 +265,8 @@ function restCommand($method, $params, $auth = array())
   return json_decode($result, true);
 }
 
-function processSurveyData($user, $botId, $answers)
+function ($user, $dialogId, $answers)
 {
-  writeVarDumpToFile(array('botId' => $botId, 'dialogId' => $dialogId, 'answers' => $answers), __DIR__ . '/results.log');
   $responseMessage = "Спасибо за прохождение опроса!\n\nВаши ответы:\n";
   foreach ($answers as $index => $answer) {
     $responseMessage .= ($index + 1) . ". " . $answer . "\n";
@@ -275,7 +274,6 @@ function processSurveyData($user, $botId, $answers)
   $access_token = file_get_contents('access_token.txt');
   $_REQUEST['auth']['domain'] = 'bitrix24.iss-reshetnev.ru';
   $_REQUEST['auth']['access_token'] = $access_token;
-  $dialog_id = file_get_contents('dialog_id.txt');
   $result = restCommand('imbot.message.add', Array(
     'DIALOG_ID' => $dialog_id,
     'MESSAGE' => $responseMessage,
@@ -316,8 +314,12 @@ function welcome_menu($user, $message_id = 0, $app_id = 4)
     ), $_REQUEST["auth"]);
 }
 
+global $dialog_id;
+
 function main_menu($user, $message_id = 0, $app_id = 4)
 {
+    global $dialog_id;
+
     $arKeyboard = array();
     $arKeyboard[] = array(
         "TEXT" => "Начать опрос",
@@ -336,8 +338,10 @@ function main_menu($user, $message_id = 0, $app_id = 4)
     ), $_REQUEST["auth"]);
     writeVarDumpToFile($_REQUEST["auth"], __DIR__ . '/aan.log');
     file_put_contents('access_token.txt', $_REQUEST['auth']['access_token']);
-    file_put_contents('dialog_id.txt', $_REQUEST['auth']['user_id']);
+    file_put_contents('dialog_id.txt', $_REQUEST['auth']['user_id'])
+    $dialog_id = $_REQUEST['data']['PARAMS']['DIALOG_ID'];
+    //writeVarDumpToFile($dialog_id, __DIR__ . '/dialog_id.log');
     return $result;
 }
 ?>
-Что делать, если сразу несколько пользователей проходят опрос? У меня dialog_id записывается в файл, через реквест он выдаёт null
+Как мне сделать, чтобы сразу после считывания в main_menu $dialog_id можно было применять и в функции processSurveyData, где и нужен $dialog_id. А-то пока что у меня работает, только если записать в файл, а позже считать из него, но если будет несколько пользователей, то гг, это не сработает, а надо так, чтобы работало и с несколькими, без базы данных, а глобальная переменная передаёт мне туда null.
