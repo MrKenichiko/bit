@@ -1,14 +1,15 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Credentials: true");
+header('Content-Type: application/json');
 /**
  * Валидатор БОТ
  */
 // require "extranet.php";
 
-$appsConfig = array();
-$configFileName = '/config_' . trim(str_replace('.', '_', $_REQUEST['auth']['domain'])) . '.php';
-if (file_exists(__DIR__ . $configFileName)) {
-    include_once __DIR__ . $configFileName;
-}
+
 function writeVarDumpToFile($data, $filename) {
   ob_start();
 
@@ -36,29 +37,37 @@ else if ($_REQUEST['event'] == 'ONIMCOMMANDADD') {
     }
 
     foreach ($_REQUEST['data']['COMMAND'] as $command) {
-        switch ($command['COMMAND']) {
-            default:
-                break;
+        if($command['COMMAND'] == 'Test') {
+          $result = restCommand('imbot.command.answer', array(
+              "COMMAND_ID" => $command['COMMAND_ID'],
+              "MESSAGE_ID" => $command['MESSAGE_ID'],
+              "MESSAGE" => "Тест",
+          ), $_REQUEST["auth"]);
         }
+
     }
 }
+
 else if ($_REQUEST['event'] == 'ONIMBOTJOINCHAT') {
     // check the event - register this application or not
     if (!isset($appsConfig[$_REQUEST['auth']['application_token']])) {
         return false;
     }
     // send help message how to use chat-bot. For private chat and for group chat need send different instructions.
-    welcom_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
+    welcome_menu($_REQUEST['data']['PARAMS']['FROM_USER_ID']);
 } // receive event "delete chat-bot"
 else if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
   $postData = file_get_contents('php://input');
   $data = json_decode($postData, true);
-
-  if (isset($data['answers']) && isset($data['userId']) && isset($data['dialogId'])) {
+  if (isset($data['answers']) && isset($data['dialog_id'])) {
     file_put_contents(__DIR__ . '/survey_results.log', print_r($data, true), FILE_APPEND);
-
-    processSurveyData($data['userId'], $data['dialogId'], $data['answers']);
+    echo json_encode(['status' => 'success', 'message' => 'Data received']);
+    $res = processSurveyData($data['answers'], $data['dialog_id']);
+    writeVarDumpToFile($res, __DIR__ . '/res.log');
+  } else {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid data']);
   }
 }
 else if ($_REQUEST['event'] == 'ONIMBOTDELETE') {
@@ -110,7 +119,7 @@ else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
     $botId = $result['result'];
 
     $result = restCommand('imbot.app.register', array(
-         'BOT_ID' => $botId, // Идентификатор бота владельца приложения для чата
+         'BOT_ID' => 98, // Идентификатор бота владельца приложения для чата
          'CODE' => 'validator', // Код приложения для чата
          'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php',
          'IFRAME_WIDTH' => '1600px', // Желаемая ширина фрейма. Минимальное значение - 250px
@@ -132,15 +141,37 @@ else if ($_REQUEST['event'] == 'ONAPPINSTALL') {
 
         'APP_ID' => 4,
         'FIELDS' => array(
-             'LANG' => array(
-			 	          array('LANGUAGE_ID' => 'en', 'TITLE' => 'Validator', 'DESCRIPTION' => 'Open Validator', 'COPYRIGHT' => 'Bitrix24'),
-			 	          array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Валидатор', 'DESCRIPTION' => 'Открыть Валидатор', 'COPYRIGHT' => 'Bitrix24'),
-			       ),
-			       'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php'
+            'IFRAME' => 'https://bitrix24.iss-reshetnev.ru/bots/validatorbot/validatorframe.php',
+            'IFRAME_WIDTH' => '1600px', // Желаемая ширина фрейма. Минимальное значение - 250px
+            'IFRAME_HEIGHT' => '900px', // Желаемая высота фрейма. Минимальное значение - 50px
+            'CONTEXT' => 'BOT',
+            'LANG' => array(
+			 	         array('LANGUAGE_ID' => 'en', 'TITLE' => 'Validator', 'DESCRIPTION' => 'Open Validator', 'COPYRIGHT' => 'Bitrix24'),
+			 	         array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Валидатор', 'DESCRIPTION' => 'Открыть Валидатор', 'COPYRIGHT' => 'Bitrix24'),
+			      ),
         ),
    ), $_REQUEST["auth"]);
-}
 
+   $result = restCommand('imbot.command.register', array(
+       'COMMAND' => 'Test',
+       'COMMON' => 'Y',
+       'HIDDEN' => 'N',
+       'EXTRANET_SUPPORT' => 'N',
+       'LANG' => array(
+           array('LANGUAGE_ID' => 'ru', 'TITLE' => 'Тест', 'PARAMS' => ''),
+       ),
+       'EVENT_COMMAND_ADD' => $handlerBackUrl,
+   ), $_REQUEST["auth"]);
+   $Test = $result['result'];
+   $appsConfig[$_REQUEST['auth']['application_token']] = array(
+
+       'TEST' => $Test,
+       'LANGUAGE_ID' => $_REQUEST['data']['LANGUAGE_ID'],
+       'AUTH' => $_REQUEST['auth'],
+   );
+   saveParams($appsConfig);
+}
+$_REQUEST['auth']['access_token'] = "abdf8466006d4a8e0061aaaa…0dcd56d75fe13a9807c3bfd";
 function saveParams($params)
 {
     $config = "<?php\n";
@@ -150,11 +181,13 @@ function saveParams($params)
     file_put_contents(__DIR__ . $configFileName, $config);
     return true;
 }
-
 function restCommand($method, $params, $auth = array())
 {
   $queryUrl = 'https://' .$_REQUEST['auth']['domain'].'/rest/'.$method;
   $queryData = http_build_query(array_merge($params, array('auth' => $_REQUEST['auth']['access_token'])));
+  writeVarDumpToFile($queryUrl, __DIR__ . '/queryUrl.log');
+  writeVarDumpToFile($queryData, __DIR__ . '/queryData.log');
+  writeVarDumpToFile($_REQUEST['auth']['access_token'], __DIR__ . '/REQUEST.log');
 
   $curl = curl_init();
   curl_setopt_array($curl, array(
@@ -169,32 +202,23 @@ function restCommand($method, $params, $auth = array())
 
   return json_decode($result, true);
 }
-//function restCommand($method, array $params = array(), array $auth = array())
-//{
-//    $queryUrl = 'https://' . $auth['domain'] . '/rest/' . $method;
-//    $queryData = http_build_query(array_merge($params, array('auth' => $auth['access_token'])));
-//    $curl = curl_init();
-//    curl_setopt_array($curl, array(
-//        CURLOPT_POST => 1,
-//        CURLOPT_HEADER => 0,
-//        CURLOPT_RETURNTRANSFER => 1,
-//        CURLOPT_URL => $queryUrl,
-//        CURLOPT_POSTFIELDS => $queryData,
-//    ));
-//    $result = curl_exec($curl);
-//    curl_close($curl);
-//    $result = json_decode($result, 1);
-//    return $result;
-//}
 
-function processSurveyData($userId, $dialogId, $answers){
-  $responseMessage = "Спасибо за прохождение опроса! Ваши ответы: " . implode(", ", $answers);
-
-  restCommand('imbot.message.add', array(
-    'DIALOG_ID' => $dialogId,
+function processSurveyData($answers, $dialog_id)
+{
+  $responseMessage = "Спасибо за прохождение опроса!\n\nВаши ответы:\n";
+  foreach ($answers as $index => $answer) {
+    $responseMessage .= ($index + 1) . ". " . $answer . "\n";
+  }
+  $access_token = file_get_contents('access_token.txt');
+  $_REQUEST['auth']['access_token'] = $access_token;
+  $_REQUEST['auth']['domain'] = 'bitrix24.iss-reshetnev.ru';
+  //$dialog_id = file_get_contents('dialog_id.txt');
+  $result = restCommand('imbot.message.add', Array(
+    'DIALOG_ID' => $dialog_id,
     'MESSAGE' => $responseMessage,
-    'SYSTEM' => 'Y'
-  ));
+  ), $_REQUEST["auth"]);
+  writeVarDumpToFile($_REQUEST["auth"], __DIR__ . '/aaf.log');
+  return $result;
 }
 
 function writeToLog($data, $title = '')
@@ -208,7 +232,7 @@ function writeToLog($data, $title = '')
     return true;
 }
 
-function welcom_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
+function welcome_menu($user, $message_id = 0, $app_id = 4)
 {
     $arKeyboard = array();
     $arKeyboard[] = array(
@@ -228,8 +252,7 @@ function welcom_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
         "KEYBOARD" => $arKeyboard, // Клавиатура, необязательное поле
     ), $_REQUEST["auth"]);
 }
-
-function main_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
+function main_menu($user, $message_id = 0, $app_id = 4)
 {
     $arKeyboard = array();
     $arKeyboard[] = array(
@@ -247,17 +270,10 @@ function main_menu($user, $bot_id = 17, $message_id = 0, $app_id = 4)
         "MESSAGE" => $message,
         "KEYBOARD" => $arKeyboard,
     ), $_REQUEST["auth"]);
+
+    writeVarDumpToFile($_REQUEST["auth"], __DIR__ . '/aan.log');
+    file_put_contents('access_token.txt', $_REQUEST['auth']['access_token']);
+    //file_put_contents('dialog_id.txt', $_REQUEST['auth']['user_id']);
     return $result;
 }
-
-function back($user, $bot_id, $message_id, $params)
-{
-    include 'db.php';
-    switch ($params) {
-        default:
-            //главное меню
-            $arResult = main_menu($user, $bot_id, $message_id);
-            $arResult1 = welcom_menu($user, $bot_id, $message_id);
-            break;
-    }
-}
+?>
