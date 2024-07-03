@@ -1,4 +1,10 @@
-<?
+<?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Credentials: true");
+/*var_dump($_REQUEST);
+exit;*/
 
 function writeToLog($data, $title = '')
 {
@@ -11,10 +17,8 @@ function writeToLog($data, $title = '')
     return true;
 }
 
-securityCheck($_GET);
-
 ?>
-
+<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -31,7 +35,7 @@ securityCheck($_GET);
         1px -1px 1px white,
         -1px 1px 1px white,
         -1px -1px 1px white;
-      color: #0B63F6;
+      color: #black;
       transition: all 1s;
     }
 
@@ -42,35 +46,31 @@ securityCheck($_GET);
       z-index: -1;
       width: 100%;
       margin: auto;
-      border-bottom: 3px solid #0B63F6;
+      border-bottom: 3px solid #black;
       bottom: .15em;
       transition: all 1s;
-    }
-
-    h1,h2,h3,p:hover:after {
-      width: 0%;
-      border-bottom-width: 1px;
     }
     .question {
       display: none;
     }
     .question.active { display: block;}
     .btn-new {
-        margin: 5px 5px 5px 5px;
-        text-align: center;
-        border: none;
-        border-radius: 10px;
-        text-decoration: none;
-        color: white;
-        background: #0B63F6;
-        box-shadow: 0 5px 0 #003CC5;
+      width: 225px;
+      background-color: #D7FAF9;
+      color: #000000;
+      font: 13px/20px var(--ui-font-family-primary,var(--ui-font-family-helvetica));
+      padding: 4px 10px;
+      display: inline-block;
+      text-decoration: none;
+      border: none;
+      text-align: center;
+      min-width: 24px;
+      cursor: pointer;
+      margin-bottom: 5px;
+      transition: opacity .5s;
+      opacity: 1;
+      box-shadow: none;
     }
-
-    .btn-new:hover {
-        background: #003CC5;
-        box-shadow: none;
-        position: relative;
-        top: 5px;
     }
     .rating {
       max-width: 33rem;
@@ -172,16 +172,15 @@ securityCheck($_GET);
     </div>
     <div id="end" class="question">
       <p>Спасибо за прохождение опроса!</p>
-      <a href="#close" class="btn-new" onclick="sendAnswers()">Закрыть окно</a>
-      <button class="btn-new" onclick="nextQuestion('end', 'surveyResult', 'Ответы')">Посмотреть ответы</button>
+      <a href="#close" class="btn-new" onclick="sendAnswers()">Завершить опрос</a>
+      <button class="btn-new" onclick="nextQuestion('end', 'surveyResult', 'NULL')">Посмотреть ответы</button>
     </div>
     <div id="surveyResult" class="question">
       <h2 class="answerh2"><b>Ответы:</b></h2>
       <div id="answers">
       </div>
-      <a href="#close" class="btn-new" onclick="sendAnswers()">Закрыть окно</a>
-      <a href="#close" class="btn-new" onclick="nextQuestion('surveyResult', 'question1', 'Начать с нуля')">Начать с нуля</a>
-      <a href="#close" class="btn-new" onclick="nextQuestion('surveyResult', 'rating', 'Оценка')">Оценить</a>
+      <a href="#close" class="btn-new" onclick="sendAnswers()">Завершить опрос</a>
+      <a href="#close" class="btn-new" onclick="nextQuestion('surveyResult', 'rating', 'NULL')">Оценить</a>
     </div>
     <div id="rating" class="question">
       <span onclick="gfg(1)"
@@ -202,7 +201,7 @@ securityCheck($_GET);
       <h3 id="output">
             Рейтинг: 0/5
       </h3>
-      <a href="#close" class="btn-new" onclick="sendAnswers()">Закрыть окно</a>
+      <a href="#close" class="btn-new" onclick="sendAnswers()">Завершить опрос</a>
     </div>
   </div>
 	<script type="text/javascript">
@@ -234,7 +233,10 @@ securityCheck($_GET);
     }
     var surveyData = {};
     function nextQuestion(currentId, nextId, answer) {
-        userAnswers.push(answer);
+        if(answer != 'NULL') {
+          userAnswers.push(answer);
+        }
+        //userAnswers.push(answer);
         surveyData[currentId] = answer;
         var currentQuestion = document.getElementById(currentId);
         var nextQuestion = document.getElementById(nextId);
@@ -296,28 +298,54 @@ securityCheck($_GET);
         }
     }
 
-
-
-function sendAnswers() {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "index.php", true);
-      xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-
+    function sendAnswers()
+    {
+      const url = "./index.php";
       const data = {
-        dialogId: 'DIALOG_ID',
-        answers: userAnswers,
-        userId: 'USER_ID',
+        'answers': userAnswers,
+        'dialog_id': <?php echo $_REQUEST['USER_ID'];?>
       };
 
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          console.log('Answers sent to server:', xhr.responseText);
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok' + response.statusText);
         }
-      };
+        return response.json();
+      })
+      .then(data => {
+        console.log('Answers sent to server:', data);
+      })
+      .catch(error => {
+        console.error('Error sending answers:',error);
+      });
 
-      xhr.send(JSON.stringify(data));
-
-      frameCommunicationSend({'action': 'close'})
+      frameCommunicationSend({'action': 'close'});
+      //const xhr = new XMLHttpRequest();
+      //xhr.open("POST", "index.php", true);
+      //xhr.setRequestHeader("Content-Type", "application/json");
+      //const data = {
+      //  dialogId: 'DIALOG_ID',
+      //  answers: userAnswers,
+      //  userId: 'USER_ID',
+      //};
+      //
+      //xhr.onreadystatechange = function () {
+      //  if (xhr.readyState === 4 && xhr.status === 200) {
+      //    console.log('Answers sent to server:', xhr.responseText);
+      //  } else {
+      //    console.error('Error sending answers:', xhr.statusText);
+      //  }
+      //};
+      //xhr.send(JSON.stringify(data));
+      //
+      //frameCommunicationSend({'action': 'close'})
     }
 
 		function frameCommunicationInit()
@@ -371,38 +399,3 @@ function sendAnswers() {
 
 </body>
 </html>
-
-<?
-function securityCheck($params)
-{
-	// this hash you setted in register rest command
-	$appHash = 'd1ab17949a572b0979d8db0d5b349cd2';
-
-	$check = parse_url($params['DOMAIN']);
-	if (!in_array($check['scheme'], Array('http', 'https')) || empty($check['host']))
-	{
-		die("BC_IFRAME_ERROR_ADDRESS");
-	}
-	$params['DOMAIN'] = $check['scheme'].'://'.$check['host'];
-	$params['SERVER_NAME'] = $check['host'];
-
-	if (strpos($_SERVER['HTTP_REFERER'], $params['DOMAIN']) !== 0)
-	{
-		die("BC_IFRAME_ERROR_SECURITY");
-	}
-
-	// get from config
-	if ($appHash)
-	{
-		if ($params['DOMAIN_HASH'] != md5($params['SERVER_NAME'].$appHash))
-		{
-			die("BC_IFRAME_ERROR_AUTH");
-		}
-	}
-	else
-	{
-		die("BC_IFRAME_ERROR_AUTH_2");
-	}
-
-	return $params;
-}
