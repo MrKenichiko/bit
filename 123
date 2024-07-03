@@ -414,4 +414,61 @@ function writeToLog($data, $title = '')
   ["error_description"]=>
   string(24) "Wrong authorization data"
 }
-access_token у меня сохраняется в файл access_token.txt если что. Только после прочтения этот файл нужно почистить, чтобы там много не забивалось этих access_token/
+access_token у меня получается в функции getAccessToken в файле index.php(
+function getAccessToken() {
+  $client_id = 'local.662c9ff1954921.14888416';
+  $client_secret = 'MwQZe6i0zcAKmxg1Zagc4KyVSJ4qiLQ0mGhTECMfJDHIvcDEtD';
+  $redirect_uri = 'redirect_URL';
+  $auth_url = 'https://bitrix24.iss-reshetnev.ru/oauth/authorize/';
+  $token_url = 'https://bitrix24.iss-reshetnev.ru/oauth/token/';
+
+  $auth_params = [
+    'response_type' => 'code',
+    'client_id' => $client_id,
+    'redirect_uri' => 'app_URL',
+  ];
+  $auth_request_url = $auth_url . '?' . http_build_query($auth_params);
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $auth_request_url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+  curl_setopt($ch, CURLOPT_HEADER, true);
+  curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
+  curl_setopt($ch, CURLOPT_COOKIEFILE, 'cookie.txt');
+  curl_setopt($ch, CURLOPT_HTTPGET, true);
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  if(preg_match('/code=([^&]*)/', $response, $matches)) {
+    $auth_code = $matches[1];
+  } else {
+    die('Error: Authorization code not found.');
+  }
+
+  $token_params = [
+    'grant_type' => 'authorization_code',
+    'client_id' => $client_id,
+    'client_secret' => $client_secret,
+    'redirect_uri' => $redirect_uri,
+    'code' => $auth_code,
+  ];
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $token_url);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($token_params));
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  $token_response = json_decode($response, true);
+  if (isset($token_response['access_token'])) {
+    return $token_response['access_token'];
+  } else {
+    die('Error: Access token not found.');
+  }
+}
+
+$access_token = getAccessToken();
+)
