@@ -1,4 +1,4 @@
-Можешь сделать через костыль какой-нибудь просто?
-client_id = local.662c9ff1954921.14888416
-secret_key = MwQZe6i0zcAKmxg1Zagc4KyVSJ4qiLQ0mGhTECMfJDHIvcDEtD
-domain = bitrix24.iss-reshetnev.ru
+Можно как-то програмно там же получить code? Он действует же всего 30 секунд, поэтому каждый раз новый нужен. 
+Вот сюда перейти для его получения:
+https://bitrix24.iss-reshetnev.ru/oauth/authorize/?response_type=code&client_id=local.662c9ff1954921.14888416&redirect_uri=app_URL
+Он там будет в адресной строке. code=XXX. Вместо XXX значение(код).
