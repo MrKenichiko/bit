@@ -1,2 +1,13 @@
-Cannot instantiate process definition Get_PC:8:98813472-39db-11ef-8c9b-00505691b92b: Unable to evaluate script: groovy.lang.MissingMethodException: No signature of method: static javax.xml.parsers.DocumentBuilderFactory.newInstanse() is applicable for argument types: () values: []
-Possible solutions: newInstance(), newInstance(java.lang.String, java.lang.ClassLoader), newNSInstance(), newNSInstance(java.lang.String, java.lang.ClassLoader) [ start-instance-error ]
+Starting instance failed [ start-instance-error ] ошибкка
+Ввожу  в начальные данные 
+{
+    "depts": ["714"]
+}
+В постмане, чтобы вывести нужную json надо ввести:
+{
+"data": {
+    "depts": ["714"]
+}
+}
+Вот запрос ${execution.getVariable("depts")} в таске
+Camunda
