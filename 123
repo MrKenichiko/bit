@@ -1,10 +1,1 @@
-ENGINE-09005 Could not parse BPMN process. Errors: 
-* ENGINE-12018 History Time To Live (TTL) cannot be null. TTL is necessary for the History Cleanup to work. The following options are possible:
-* Set historyTimeToLive in the model
-* Set a default historyTimeToLive as a global process engine configuration
-* (Not recommended) Deactivate the enforceTTL config to disable this check: ENGINE-12018 History Time To Live (TTL) cannot be null. TTL is necessary for the History Cleanup to work. The following options are possible:
-* Set historyTimeToLive in the model
-* Set a default historyTimeToLive as a global process engine configuration
-* (Not recommended) Deactivate the enforceTTL config to disable this check | resource try1.bpmn | line 3 | column 58
-* Unsupported boundary event type | resource try1.bpmn | line 28 | column 77 [ deploy-error ]
-Комунда, в чём проблема?
+
