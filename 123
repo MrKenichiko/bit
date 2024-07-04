@@ -33,7 +33,7 @@ dept - номер отдела.
       <bpmn:incoming>Flow_1qrnmik</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1qrnmik" name="Да" sourceRef="Gateway_01nzle7" targetRef="Event_1yua8n7" />
-    <bpmn:task id="Activity_0bp751d" name="Согласование у начальника 714 отдела&#10;Объявление sogl1=111, если согласовано">
+    <bpmn:task id="Activity_0bp751d" name="Согласование у начальника 714 отдела&#10;Объявление sogl1=111, если согласовано. Система шлёт запрос, а не ты">
       <bpmn:incoming>Flow_1g604k1</bpmn:incoming>
       <bpmn:outgoing>Flow_17iybfq</bpmn:outgoing>
     </bpmn:task>
