@@ -1,3 +1,21 @@
+[C:\Users\student\Desktop\camunda\try1.bpmn] unparsable content <=> detected; this may indicate an invalid BPMN 2.0 diagram file
+	line: 39
+	column: 83
+	nested error: illegal first char nodeName
+	line: 39
+	column: 83
+	nested error: illegal first char nodeName
+    at ye (webpack://camundanode_modules/bpmn-js/node_modules/moddle-xml/dist/index.esm.js:64:9)
+    at error (webpack://camundanode_modules/bpmn-js/node_modules/moddle-xml/dist/index.esm.js:713:12)
+    at onError (webpack://camundanode_modules/saxen/dist/index.esm.js:193:4)
+    at file:///C:/camunda/resources/app.asar/public/bundle.js:2:2366441
+    at xml (webpack://camundanode_modules/saxen/dist/index.esm.js:298:10)
+    at file:///C:/camunda/resources/app.asar/public/266.js:23:81278
+    at new Promise (<anonymous>)
+    at Ne.fromXML (webpack://camundanode_modules/bpmn-js/node_modules/moddle-xml/dist/index.esm.js:879:9)
+    at fromXML (webpack://camundanode_modules/bpmn-js/node_modules/bpmn-moddle/dist/index.esm.js:58:16)
+    at fromXML (webpack://camundanode_modules/bpmn-js/lib/BaseViewer.js:226:39) [ error ]
+Чини. У меня Camunda 7
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0n7vmh5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
   <bpmn:process id="Process_0xexr74" isExecutable="true" camunda:historyTimeToLive="P7D">
