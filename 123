@@ -1,1 +1,1 @@
-Cannot instantiate process definition Get_PC:20:87d004a8-39e7-11ef-8c9b-00505691b92b: Unknown property used in expression: https://staging-svt.iss-reshetnev.ru/api/v4/graphics/info?depts=${dept}. Cause: Cannot resolve identifier 'dept' [ start-instance-error ]
+
