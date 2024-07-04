@@ -1,13 +1,195 @@
-Starting instance failed [ start-instance-error ] ошибкка
-Ввожу  в начальные данные 
-{
-    "depts": ["714"]
-}
-В постмане, чтобы вывести нужную json надо ввести:
-{
-"data": {
-    "depts": ["714"]
-}
-}
-Вот запрос ${execution.getVariable("depts")} в таске
-Camunda
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0n7vmh5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <bpmn:process id="Get_PC" isExecutable="true" camunda:historyTimeToLive="P7D">
+    <bpmn:startEvent id="Event_0d4tzqk" name="tn&#10;dept">
+      <bpmn:outgoing>Flow_1vnw227</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gateway_01nzle7" name="ПК&#62;20">
+      <bpmn:incoming>Flow_0pg3vrg</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qrnmik</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0jz8efs</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1g604k1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1vnw227" sourceRef="Event_0d4tzqk" targetRef="Activity_1j3ft0u" />
+    <bpmn:sequenceFlow id="Flow_0pg3vrg" sourceRef="Activity_1j3ft0u" targetRef="Gateway_01nzle7" />
+    <bpmn:endEvent id="Event_1yua8n7" name="Отказ&#10;Много ПК">
+      <bpmn:incoming>Flow_1qrnmik</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1qrnmik" name="Да" sourceRef="Gateway_01nzle7" targetRef="Event_1yua8n7">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">default flow</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0jz8efs" sourceRef="Gateway_01nzle7" targetRef="Activity_02eh0hm">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">default flow</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1g604k1" name="Нет" sourceRef="Gateway_01nzle7" targetRef="Activity_0bp751d">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">default flow</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="Gateway_177f0g6" name="Отказ хоть у одного?">
+      <bpmn:incoming>Flow_17iybfq</bpmn:incoming>
+      <bpmn:incoming>Flow_1wj53he</bpmn:incoming>
+      <bpmn:outgoing>Flow_0rnsomz</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0ij6ffl</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_17iybfq" sourceRef="Activity_0bp751d" targetRef="Gateway_177f0g6" />
+    <bpmn:endEvent id="Event_025djp7" name="Сообщение человеку с указанным tn &#34;Отделу $dept будет выдан пк.&#34;&#10;Подписано = $sogl1&#10;Подписано = $sogl2">
+      <bpmn:incoming>Flow_0rnsomz</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0rnsomz" name="Нет" sourceRef="Gateway_177f0g6" targetRef="Event_025djp7">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${sogl1 == "111" &amp;&amp; sogl2 == "222" || sogl2 == "333"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_0c4li66" name="Отказать:&#10;Решение 714 отдела">
+      <bpmn:incoming>Flow_0ij6ffl</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0ij6ffl" name="Да" sourceRef="Gateway_177f0g6" targetRef="Event_0c4li66">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">default flow</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_1j3ft0u" name="Запрос к СВТ">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">https://staging-svt.iss-reshetnev.ru/api/v4/graphics/info?depts=${execution.activityInstanceId}</camunda:inputParameter>
+            <camunda:outputParameter name="statusCode">
+              <camunda:script scriptFormat="JavaScript">statusCode;</camunda:script>
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1vnw227</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pg3vrg</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_0bp751d" name="Согласование у начальника 714 отдела&#10;Объявление sogl1=111, если согласовано. Система шлёт запрос, а не ты">
+      <bpmn:extensionElements>
+        <camunda:taskListener expression="${execution.setVariable(&#34;sogl1&#34;, &#34;111&#34;)}" event="create" id="sogl1" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1g604k1</bpmn:incoming>
+      <bpmn:outgoing>Flow_17iybfq</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1wj53he" sourceRef="Activity_02eh0hm" targetRef="Gateway_177f0g6" />
+    <bpmn:userTask id="Activity_02eh0hm" name="Согласование у нач. 7141 + спустя 10 минут автоматически&#10;Согласовано:&#10;Объявление переменной sogl2=222, согласовано по таймеру sogl2=333">
+      <bpmn:extensionElements>
+        <camunda:taskListener expression="${execution.setVariable(&#34;sogl2&#34;, &#34;222&#34;)}" event="create" id="sogl2" />
+        <camunda:taskListener expression="${execution.setVariable(&#34;sogl2&#34;, &#34;333&#34;)}" event="timeout" id="timer">
+          <bpmn:timerEventDefinition id="TimerEventDefinition_09a3ufq">
+            <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10M</bpmn:timeDuration>
+          </bpmn:timerEventDefinition>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0jz8efs</bpmn:incoming>
+      <bpmn:outgoing>Flow_1wj53he</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:task id="Activity_168ruur" name="Пользователь отправляет через GET&#10;tn = 444&#10;sign = 555(ожидается 3 минуты)" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Get_PC">
+      <bpmndi:BPMNShape id="Event_0d4tzqk_di" bpmnElement="Event_0d4tzqk">
+        <dc:Bounds x="192" y="462" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="200" y="505" width="21" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_01nzle7_di" bpmnElement="Gateway_01nzle7" isMarkerVisible="true">
+        <dc:Bounds x="495" y="455" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="555" y="473" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1yua8n7_di" bpmnElement="Event_1yua8n7">
+        <dc:Bounds x="502" y="562" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="497" y="605" width="47" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_177f0g6_di" bpmnElement="Gateway_177f0g6" isMarkerVisible="true">
+        <dc:Bounds x="925" y="245" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="917" y="305" width="66" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_025djp7_di" bpmnElement="Event_025djp7">
+        <dc:Bounds x="1072" y="252" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1047" y="295" width="87" height="119" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0c4li66_di" bpmnElement="Event_0c4li66">
+        <dc:Bounds x="932" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="917" y="80" width="65" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1oky7js_di" bpmnElement="Activity_1j3ft0u">
+        <dc:Bounds x="290" y="440" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0jse4xp_di" bpmnElement="Activity_0bp751d">
+        <dc:Bounds x="690" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0r18zu1_di" bpmnElement="Activity_02eh0hm">
+        <dc:Bounds x="690" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_168ruur_di" bpmnElement="Activity_168ruur">
+        <dc:Bounds x="560" y="260" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1vnw227_di" bpmnElement="Flow_1vnw227">
+        <di:waypoint x="228" y="480" />
+        <di:waypoint x="290" y="480" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0pg3vrg_di" bpmnElement="Flow_0pg3vrg">
+        <di:waypoint x="390" y="480" />
+        <di:waypoint x="495" y="480" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qrnmik_di" bpmnElement="Flow_1qrnmik">
+        <di:waypoint x="520" y="505" />
+        <di:waypoint x="520" y="562" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="528" y="531" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jz8efs_di" bpmnElement="Flow_0jz8efs">
+        <di:waypoint x="520" y="455" />
+        <di:waypoint x="520" y="400" />
+        <di:waypoint x="690" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g604k1_di" bpmnElement="Flow_1g604k1">
+        <di:waypoint x="520" y="455" />
+        <di:waypoint x="520" y="210" />
+        <di:waypoint x="690" y="210" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="525" y="413" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17iybfq_di" bpmnElement="Flow_17iybfq">
+        <di:waypoint x="740" y="250" />
+        <di:waypoint x="740" y="270" />
+        <di:waypoint x="925" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rnsomz_di" bpmnElement="Flow_0rnsomz">
+        <di:waypoint x="975" y="270" />
+        <di:waypoint x="1072" y="270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1014" y="252" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ij6ffl_di" bpmnElement="Flow_0ij6ffl">
+        <di:waypoint x="950" y="245" />
+        <di:waypoint x="950" y="158" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="958" y="199" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wj53he_di" bpmnElement="Flow_1wj53he">
+        <di:waypoint x="740" y="360" />
+        <di:waypoint x="740" y="270" />
+        <di:waypoint x="925" y="270" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+Добавь проверку после запроса к свт, там сейчас стоит default flow. И что выводит запрос к свт? Мне надо, чтобы он давал мне переменную workplace_count из json файла, который приходит после post запроса со значением depts=714, надо сделать так. что значение это вводит пользователь сам.
