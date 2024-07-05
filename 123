@@ -1,3 +1,4 @@
+Camunda. Camunda modeler 7.21.
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0n7vmh5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0">
   <bpmn:process id="Get_PC" isExecutable="true" camunda:historyTimeToLive="P7D">
@@ -80,6 +81,15 @@
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Get_PC">
+      <bpmndi:BPMNShape id="StartEvent_0d4tzqk_di" bpmnElement="Event_0d4tzqk">
+        <dc:Bounds x="162" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="154" y="138" width="53" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1j3ft0u_di" bpmnElement="Activity_1j3ft0u">
+        <dc:Bounds x="250" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_01nzle7_di" bpmnElement="Gateway_01nzle7" isMarkerVisible="true">
         <dc:Bounds x="525" y="95" width="50" height="50" />
         <bpmndi:BPMNLabel>
@@ -113,15 +123,10 @@
           <dc:Bounds x="335" y="332" width="65" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="StartEvent_0d4tzqk_di" bpmnElement="Event_0d4tzqk">
-        <dc:Bounds x="162" y="102" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="154" y="138" width="53" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_1j3ft0u_di" bpmnElement="Activity_1j3ft0u">
-        <dc:Bounds x="250" y="80" width="100" height="80" />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1vnw227_di" bpmnElement="Flow_1vnw227">
+        <di:waypoint x="198" y="120" />
+        <di:waypoint x="250" y="120" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0pg3vrg_di" bpmnElement="Flow_0pg3vrg">
         <di:waypoint x="350" y="120" />
         <di:waypoint x="525" y="120" />
@@ -163,10 +168,12 @@
           <dc:Bounds x="452" y="415" width="14" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1vnw227_di" bpmnElement="Flow_1vnw227">
-        <di:waypoint x="198" y="120" />
-        <di:waypoint x="250" y="120" />
-      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
+После проверки на кол-во пк должно идти на проверку к 2 начальникам: 714(что уже есть) и 7141, у 7141 проверки должен быть таймер 10 минут(после таймера автоматическое подтверждение, если подтвердил человек, то sogl2=222, если таймер - sogl2=333.
+И сделай нормальное условие для отказа, если пк много уже. Ещё пользователь сам вводит dept и tn в самом начале.
+А потом по dept ищется "workplace_count" - кол-во пк. 
+Оно ищется через POST запрос по ссылке: https://staging-svt.iss-reshetnev.ru/api/v4/graphics/info/dept.
+И вот, например, пример выданной странице при вводе dept=714:
+{"workplace_technique":{"count_pc":{"i3":6,"i5":22,"i7":8,"i9":0,"other":32},"count_mons":{"before19d":2,"before22d":23,"before24d":42,"before27d":5,"after27d":7},"count_prints":{"printer":9,"plotter":0,"scaner":4,"mfu":9,"other":0}},"warehouse_technique":{"count_pc":{"i3":1,"i5":0,"i7":3,"i9":0,"other":5},"count_mons":{"before19d":0,"before22d":4,"before24d":2,"before27d":0,"after27d":0},"count_prints":{"printer":4,"plotter":0,"scaner":0,"mfu":0,"other":0}},"statistics_statuses":{"count_workplaces":{"access":3197,"freezed":2130,"wait_check":6,"temporal":0,"reject":5},"count_workplaces_tech":{"on_wp":12221,"on_wh":15,"should_get":19,"must_pass":11,"write_off":6,"written_off":5,"to_swap":0},"count_warehouse_tech":{"new":578,"used":29,"write_off":6,"written_off":0}},"workplace_count":76,"item_count":193,"item_warehouse_count":613,"request_work_count":44}
