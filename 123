@@ -1,4 +1,5 @@
 Cannot instantiate process definition Get_PC:6:e4d0d61c-3a79-11ef-8c9b-00505691b92b: condition expression returns non-Boolean: result has class java.lang.String and not java.lang.Boolean
+В чём проблема?
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0n7vmh5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0">
   <bpmn:process id="Get_PC" isExecutable="true" camunda:historyTimeToLive="P7D">
