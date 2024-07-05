@@ -1,1 +1,95 @@
-Cannot instantiate process definition Get_PC:7:24c24f04-3a85-11ef-8c9b-00505691b92b: ENGINE-09024 Unable to find resource at path https://github.com/MrKenichiko/bit/blob/main/first.js
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1lucght" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <bpmn:process id="Get_PC_test" name="GetPC_test" isExecutable="true" camunda:historyTimeToLive="P7D">
+    <bpmn:startEvent id="StartEvent_1" name="Start">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="dept" label="Dept" type="string" defaultValue="714" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_0s3qnrx</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0s3qnrx" sourceRef="StartEvent_1" targetRef="Activity_1j3ft0u" />
+    <bpmn:endEvent id="Event_0djra68">
+      <bpmn:incoming>Flow_165s36o</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_165s36o" sourceRef="Activity_1owg7qr" targetRef="Event_0djra68" />
+    <bpmn:userTask id="Activity_1owg7qr" name="Результат">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="Result" label="Result" type="string" defaultValue="${response}" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_11hudt8</bpmn:incoming>
+      <bpmn:outgoing>Flow_165s36o</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Activity_1j3ft0u" name="Запрос к СВТ">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">https://staging-svt.iss-reshetnev.ru/api/v4/graphics/info/dept/</camunda:inputParameter>
+            <camunda:inputParameter name="payload">{
+"data": {
+    "depts": [${dept}]
+}
+}</camunda:inputParameter>
+            <camunda:outputParameter name="statusCode">
+              <camunda:script scriptFormat="JavaScript">statusCode;</camunda:script>
+            </camunda:outputParameter>
+            <camunda:outputParameter name="response">
+              <camunda:script scriptFormat="JavaScript">S(JSON.stringify(response), 'application/json');</camunda:script>
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0s3qnrx</bpmn:incoming>
+      <bpmn:outgoing>Flow_11hudt8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_11hudt8" sourceRef="Activity_1j3ft0u" targetRef="Activity_1owg7qr" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Get_PC_test">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="79" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="186" y="122" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0djra68_di" bpmnElement="Event_0djra68">
+        <dc:Bounds x="632" y="79" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ig3p6c_di" bpmnElement="Activity_1owg7qr">
+        <dc:Bounds x="480" y="57" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1j3ft0u_di" bpmnElement="Activity_1j3ft0u">
+        <dc:Bounds x="300" y="57" width="100" height="80" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="323" y="140" width="67" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0s3qnrx_di" bpmnElement="Flow_0s3qnrx">
+        <di:waypoint x="215" y="97" />
+        <di:waypoint x="300" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_165s36o_di" bpmnElement="Flow_165s36o">
+        <di:waypoint x="580" y="97" />
+        <di:waypoint x="632" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11hudt8_di" bpmnElement="Flow_11hudt8">
+        <di:waypoint x="400" y="97" />
+        <di:waypoint x="480" y="97" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+Вот моя xml. Camunda 7.21. Мне надо сделать так, чтобы выводилась переменная workplace_count, а не весь файл json, который получаю в значение response. Как мне оттуда достать переменную нужную?
+Вот что получается в response:
+"{\"workplace_technique\":{\"count_pc\":{\"i3\":6,\"i5\":22,\"i7\":8,\"i9\":0,\"other\":32},\"count_mons\":{\"before19d\":2,\"before22d\":23,\"before24d\":42,\"before27d\":5,\"after27d\":7},\"count_prints\":{\"printer\":9,\"plotter\":0,\"scaner\":4,\"mfu\":9,\"other\":0}},\"warehouse_technique\":{\"count_pc\":{\"i3\":1,\"i5\":0,\"i7\":3,\"i9\":0,\"other\":5},\"count_mons\":{\"before19d\":0,\"before22d\":4,\"before24d\":2,\"before27d\":0,\"after27d\":0},\"count_prints\":{\"printer\":4,\"plotter\":0,\"scaner\":0,\"mfu\":0,\"other\":0}},\"statistics_statuses\":{\"count_workplaces\":{\"access\":3197,\"freezed\":2130,\"wait_check\":6,\"temporal\":0,\"reject\":5},\"count_workplaces_tech\":{\"on_wp\":12221,\"on_wh\":15,\"should_get\":19,\"must_pass\":11,\"write_off\":6,\"written_off\":5,\"to_swap\":0},\"count_warehouse_tech\":{\"new\":578,\"used\":29,\"write_off\":6,\"written_off\":0}},\"workplace_count\":76,\"item_count\":193,\"item_warehouse_count\":613,\"request_work_count\":44}"
