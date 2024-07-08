@@ -1,4 +1,1 @@
-Запрос от execution.getVariable('tn'). Отделу execution.getVariable('dept') будет выдан ПК. Подписано: "execution.getVariable('sogl1')". Подписано: "execution.getVariable('sogl2')"
-Как мне этот текст добавить в url:
-https://telegram-api.iss-reshetnev.ru:8000/send_message?login=SilchenkoDM&text=тест
-Вместо слова тест
+
