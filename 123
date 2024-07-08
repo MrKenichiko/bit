@@ -1,1 +1,33 @@
+<bpmn:serviceTask id="Activity_SendMessage" name="Отправка сообщения в Telegram">
+  <bpmn:extensionElements>
+    <camunda:connector>
+      <camunda:inputOutput>
+        <camunda:inputParameter name="method">GET</camunda:inputParameter>
+        <camunda:inputParameter name="url">
+          <camunda:script scriptFormat="groovy">
+            <![CDATA[
+              import java.net.URLEncoder
+
+              // Получение значений переменных
+              def tn = execution.getVariable('tn')
+              def dept = execution.getVariable('dept')
+              def sogl1 = execution.getVariable('sogl1')
+              def sogl2 = execution.getVariable('sogl2')
+
+              // Формирование текста сообщения
+              def message = "Запрос от ${tn}. Отделу ${dept} будет выдан ПК. Подписано: \"${sogl1}\". Подписано: \"${sogl2}\""
+
+              // Кодирование сообщения
+              def encodedMessage = URLEncoder.encode(message, 'UTF-8')
+
+              // Формирование окончательного URL
+              return "https://telegram-api.iss-reshetnev.ru:8000/send_message?login=SilchenkoDM&text=${encodedMessage}"
+            ]]>
+          </camunda:script>
+        </camunda:inputParameter>
+      </camunda:inputOutput>
+      <camunda:connectorId>http-connector</camunda:connectorId>
+    </camunda:connector>
+  </bpmn:extensionElements>
+</bpmn:serviceTask>
 
