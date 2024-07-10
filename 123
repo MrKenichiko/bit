@@ -1,1 +1,2 @@
-Cannot instantiate process definition TelegramAPI:6:80075d2f-3e95-11ef-8c9b-00505691b92b: Unknown property used in expression: ${messages.length}. Cause: The class 'java.lang.String' does not have the property 'length'.
+Cannot instantiate process definition TelegramAPI:8:36a16ca6-3e96-11ef-8c9b-00505691b92b: ENGINE-02025 Variable 'messages' is not of the expected type 'Collection'.
+Скажи просто что изменить, не надо заново писать весь код
