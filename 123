@@ -1,9 +1,19 @@
-Русский встречается только в переменных:
-justification
-device_title
-fio
-reason
-family_with_initials
-Вот весь правильный файл:
-{"app_id":"105311","case_id":"111472","file_url":"ssd/2024/05-07-24/06/yPlB7dgwRc.pdf","file_hash":"4e374a21918aae39e715a47830aa04b5336f42ca080d7ae8d9d783c62eb5703c","data":{"original_details":[{"section_id":"2","subsections_id":"3","count_ae":"1","justification":"Дополнительные устройства к ПК:<br>0766088<br>Комплект необходим для проведения сеансов ВКС<br/>Заявка для ФИО: Мельянков Виктор Алексеевич,<br/>Т.Н.: 17870, Подразделение: 453, Корпус-комната: корп.37, к.628, Тел.: 11-50","softList":null,"device_title":"Комплект ВКС (камера + переговорное устройство)","approved_chief":"P"}],"tn":"22144","fio":"Мельянков Виктор Алексеевич","tn_requesting":"17870","invent_num":null,"reason":"Комплект необходим для проведения сеансов ВКС","selectedAccount":"BatanovVV","selectedTn":"17475","tel":"11-50","ms":"false","division":"453","family_with_initials":"Павлов О.И. т. 12-84","id":"105311","additional_files":null},"controller":"api/v3/warehouse/requests","action":"new_request","request":{"app_id":"105311","case_id":"111472","file_url":"ssd/2024/05-07-24/06/yPlB7dgwRc.pdf","file_hash":"4e374a21918aae39e715a47830aa04b5336f42ca080d7ae8d9d783c62eb5703c","data":{"original_details":[{"section_id":"2","subsections_id":"3","count_ae":"1","justification":"Дополнительные устройства к ПК:<br>0766088<br>Комплект необходим для проведения сеансов ВКС<br/>Заявка для ФИО: Мельянков Виктор Алексеевич,<br/>Т.Н.: 17870, Подразделение: 453, Корпус-комната: корп.37, к.628, Тел.: 11-50","softList":null,"device_title":"Комплект ВКС (камера + переговорное устройство)","approved_chief":"P"}],"tn":"22144","fio":"Мельянков Виктор Алексеевич","tn_requesting":"17870","invent_num":null,"reason":"Комплект необходим для проведения сеансов ВКС","selectedAccount":"BatanovVV","selectedTn":"17475","tel":"11-50","ms":"false","division":"453","family_with_initials":"Павлов О.И. т. 12-84","id":"105311","additional_files":null}}}
-Нельзя просто проверку специальную для этих переменных добавить? Что если вот они, то скипается до следующей и ставится для значения этой переменной кавычки в правильных местах ну или как-то так
+Отправляю пост запрос в камунду с данными:
+{
+    "variables": {
+        "data": {
+            "value": {
+                "app_id":"105311",
+                "case_id":"111472",
+                "file_url":"ssd/2024/05-07-24/06/yPlB7dgwRc.pdf"
+            },
+            "type": "Json"
+        }
+        }
+}
+Получаю ошибку:
+{
+    "type": "InvalidRequestException",
+    "message": "Cannot instantiate process definition PCLKTRY2:78:3b002e3e-3e83-11ef-8c9b-00505691b92b: Must provide 'null' or String value for value of SerializableValue type 'Json'.",
+    "code": null
+}
