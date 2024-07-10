@@ -1,5 +1,146 @@
-Камунда моделер. Так, задача, мне надо получать по гету с ссылки https://telegram-api.iss-reshetnev.ru:8000/get_random_users пользователей рандомное кол-во, там логины. Это я уже сделал и всё работает, потом мне надо по ссылке 
-https://telegram-api.iss-reshetnev.ru:8000/mock_send_message?login=<login>&text=<text_message>
-отправлять сообщения. Вместо <login> - один логин из первого ответа полученного, вместо <text_message> пусть будет всегда Привет
-Используй элементы и функции камунды моделер
-Данные из гета приходят в виде массива: ["MakarovAV","ElpatovAS","KononchukLE","MihalchenkovaEO","MartynyukNA","BerestovAV","FisenkoOB"]
+Вот моя xml
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0q7lq6v" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <bpmn:process id="TelegramAPI" name="TelegramAPI" isExecutable="true" camunda:historyTimeToLive="P7D">
+    <bpmn:startEvent id="StartEvent_1" name="Начало">
+      <bpmn:outgoing>Flow_17koq9j</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="Event_0o6vdva" name="Конец">
+      <bpmn:incoming>Flow_0mrz9ok</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_17koq9j" sourceRef="StartEvent_1" targetRef="Activity_1sxqsg8" />
+    <bpmn:serviceTask id="Activity_1sxqsg8" name="Получение данных">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">https://telegram-api.iss-reshetnev.ru:8000/get_random_users</camunda:inputParameter>
+            <camunda:outputParameter name="statusCode">
+              <camunda:script scriptFormat="JavaScript">statusCode;</camunda:script>
+            </camunda:outputParameter>
+            <camunda:outputParameter name="response">
+              <camunda:script scriptFormat="JavaScript">S(response);</camunda:script>
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_17koq9j</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kgzgm1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1kgzgm1" sourceRef="Activity_1sxqsg8" targetRef="Activity_00mmsd7" />
+    <bpmn:userTask id="Activity_0bveqmh" name="Пользователи">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="ID" label="Пользователи" type="string" defaultValue="${messages}" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+    </bpmn:userTask>
+    <bpmn:task id="Activity_0ytih93" name="Данные">
+      <bpmn:documentation>https://telegram-api.iss-reshetnev.ru:8000/mock_send_message?login=&lt;login&gt;&amp;text=&lt;text_message&gt;
+&lt;login&gt; - пользователь
+&lt;text_message&gt; - сообщение(тест)</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:scriptTask id="Activity_00mmsd7" name="Получение логинов" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_1kgzgm1</bpmn:incoming>
+      <bpmn:outgoing>Flow_05b3eun</bpmn:outgoing>
+      <bpmn:script>var users = JSON.parse(execution.getVariable('response'));
+
+var messages = [];
+users.forEach(user =&gt; {
+    messages.push({ login: user, text: 'Привет' });
+});
+
+execution.setVariable('messages', JSON.stringify(messages));</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_05b3eun" sourceRef="Activity_00mmsd7" targetRef="Activity_0ohqy1p" />
+    <bpmn:serviceTask id="Activity_0ohqy1p" name="Отправка сообщений">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="url">https://telegram-api.iss-reshetnev.ru:8000/mock_send_message?login=${message.login}&amp;amp;text=${message.text}</camunda:inputParameter>
+            <camunda:outputParameter name="statusCode">
+              <camunda:script scriptFormat="JavaScript">statusCode</camunda:script>
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_0mrz9ok</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics>
+        <bpmn:loopCardinality>${messages.length}</bpmn:loopCardinality>
+        <bpmn:inputDataItem id="DataInput_1" name="message" />
+        <bpmn:outputDataItem id="DataOutput_1" name="response" />
+      </bpmn:multiInstanceLoopCharacteristics>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0mrz9ok" sourceRef="Activity_0ohqy1p" targetRef="Event_0o6vdva" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="TelegramAPI">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="319" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="179" y="362" width="37" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1yax0p7_di" bpmnElement="Activity_1sxqsg8">
+        <dc:Bounds x="280" y="297" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0mz3x53_di" bpmnElement="Activity_0bveqmh">
+        <dc:Bounds x="450" y="130" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ytih93_di" bpmnElement="Activity_0ytih93">
+        <dc:Bounds x="320" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1bndwov_di" bpmnElement="Activity_00mmsd7">
+        <dc:Bounds x="450" y="297" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0o6vdva_di" bpmnElement="Event_0o6vdva">
+        <dc:Bounds x="812" y="319" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="815" y="362" width="31" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0x0s6y5_di" bpmnElement="Activity_0ohqy1p">
+        <dc:Bounds x="630" y="300" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_17koq9j_di" bpmnElement="Flow_17koq9j">
+        <di:waypoint x="215" y="337" />
+        <di:waypoint x="280" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kgzgm1_di" bpmnElement="Flow_1kgzgm1">
+        <di:waypoint x="380" y="337" />
+        <di:waypoint x="450" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05b3eun_di" bpmnElement="Flow_05b3eun">
+        <di:waypoint x="550" y="337" />
+        <di:waypoint x="590" y="337" />
+        <di:waypoint x="590" y="340" />
+        <di:waypoint x="630" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mrz9ok_di" bpmnElement="Flow_0mrz9ok">
+        <di:waypoint x="730" y="340" />
+        <di:waypoint x="771" y="340" />
+        <di:waypoint x="771" y="337" />
+        <di:waypoint x="812" y="337" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+Ошибки:
+ENGINE-09005 Could not parse BPMN process. Errors: 
+* LoopDataInputRef/activiti:collection must be set when using inputDataItem or activiti:elementVariable | resource TelegramAPI.bpmn | line 75 | column 46 [ deploy-error ]
+Это при деплое
+<bpmn:inputDataItem id="DataInput_1" name="message" />
+<bpmn:outputDataItem id="DataOutput_1" name="response" />
+А это он не воспринимает
