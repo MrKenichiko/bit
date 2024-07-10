@@ -1,3 +1,4 @@
+Ошибку выдал в Postman
 "type": "RestException",
     "message": "Cannot instantiate process definition PCLKTRY2:35:a8b795a8-3e64-11ef-8c9b-00505691b92b: Unable to evaluate script while executing activity 'StartEvent_1' in the process definition with id 'PCLKTRY2:35:a8b795a8-3e64-11ef-8c9b-00505691b92b':org.graalvm.polyglot.PolyglotException: SyntaxError: Unexpected token a in JSON at position 1",
     "code": 0
