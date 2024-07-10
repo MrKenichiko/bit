@@ -2,3 +2,4 @@
 https://telegram-api.iss-reshetnev.ru:8000/mock_send_message?login=<login>&text=<text_message>
 отправлять сообщения. Вместо <login> - один логин из первого ответа полученного, вместо <text_message> пусть будет всегда Привет
 Используй элементы и функции камунды моделер
+Данные из гета приходят в виде массива: ["MakarovAV","ElpatovAS","KononchukLE","MihalchenkovaEO","MartynyukNA","BerestovAV","FisenkoOB"]
