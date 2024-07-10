@@ -220,3 +220,4 @@ ${response.prop("app_id")}</bpmn:documentation>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
+Напиши что нужно сделать, чтобы исправить ошибку и данные в правильном формате отправлялись
