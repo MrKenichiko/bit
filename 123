@@ -1,8 +1,222 @@
-Камунда моделер. У меня есть данные:
+Камунда моделер. У меня есть данные, которые я получил:
+
 {app_id=105311, case_id=111472, file_url=ssd/2024/05-07-24/06/yPlB7dgwRc.pdf, file_hash=4e374a21918aae39e715a47830aa04b5336f42ca080d7ae8d9d783c62eb5703c, data={original_details=[{section_id=2, subsections_id=3, count_ae=1, justification=Дополнительные устройства к ПК:<br>0766088<br>Комплект необходим для проведения сеансов ВКС<br/>Заявка для ФИО: Мельянков Виктор Алексеевич,<br/>Т.Н.: 17870, Подразделение: 453, Корпус-комната: корп.37, к.628, Тел.: 11-50, softList=null, device_title=Комплект ВКС (камера + переговорное устройство), approved_chief=P}], tn=22144, fio=Мельянков Виктор Алексеевич, tn_requesting=17870, invent_num=null, reason=Комплект необходим для проведения сеансов ВКС, selectedAccount=BatanovVV, selectedTn=17475, tel=11-50, ms=false, division=453, family_with_initials=Павлов О.И. т. 12-84, id=105311, additional_files=null}, controller=api/v3/warehouse/requests, action=new_request, request={app_id=105311, case_id=111472, file_url=ssd/2024/05-07-24/06/yPlB7dgwRc.pdf, file_hash=4e374a21918aae39e715a47830aa04b5336f42ca080d7ae8d9d783c62eb5703c, data={original_details=[{section_id=2, subsections_id=3, count_ae=1, justification=Дополнительные устройства к ПК:<br>0766088<br>Комплект необходим для проведения сеансов ВКС<br/>Заявка для ФИО: Мельянков Виктор Алексеевич,<br/>Т.Н.: 17870, Подразделение: 453, Корпус-комната: корп.37, к.628, Тел.: 11-50, softList=null, device_title=Комплект ВКС (камера + переговорное устройство), approved_chief=P}], tn=22144, fio=Мельянков Виктор Алексеевич, tn_requesting=17870, invent_num=null, reason=Комплект необходим для проведения сеансов ВКС, selectedAccount=BatanovVV, selectedTn=17475, tel=11-50, ms=false, division=453, family_with_initials=Павлов О.И. т. 12-84, id=105311, additional_files=null}}}
 И мне надо их отправить post запросом дальше. Вот как я это делаю в payload:
-
-              ${data.toString()}
-
+${data.toString()}
 Но мне выдаёт ошибку:
 Cannot instantiate process definition PCLKTRY2:47:b0a5205c-3e67-11ef-8c9b-00505691b92b: Unable to evaluate script:org.camunda.spin.spi.SpinDataFormatException: SPIN-01004 No matching data format detected
+Вот моя диаграмма:
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_04o060i" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <bpmn:process id="PCLKTRY2" name="PCLKTRY2" isExecutable="true" camunda:historyTimeToLive="P7D">
+    <bpmn:endEvent id="Event_01xskuy" name="Конец">
+      <bpmn:incoming>Flow_0jmr0lp</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_1jgxc9n" name="Создание заявки в СВТ">
+      <bpmn:documentation>JSON с начала отправляем по ссылке 
+https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request - ссылка для отправки запроса</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request</camunda:inputParameter>
+            <camunda:inputParameter name="payload">
+              ${data.toString()}
+              </camunda:inputParameter>
+            <camunda:outputParameter name="statusCode">
+              <camunda:script scriptFormat="JavaScript">statusCode;</camunda:script>
+            </camunda:outputParameter>
+            <camunda:outputParameter name="response">
+              <camunda:script scriptFormat="JavaScript">S(response);</camunda:script>
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0l61ypj</bpmn:incoming>
+      <bpmn:outgoing>Flow_0thy8kf</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0thy8kf" sourceRef="Activity_1jgxc9n" targetRef="Activity_1t295ho" />
+    <bpmn:endEvent id="Event_07spxbv" name="Конец">
+      <bpmn:incoming>Flow_1hpolqd</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_00twnm7" name="Согласовано?">
+      <bpmn:incoming>Flow_14jmklh</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hpolqd</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1fisqi5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1hpolqd" name="Нет" sourceRef="Gateway_00twnm7" targetRef="Event_07spxbv">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${(response.prop("access").numberValue()) == "0"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1fisqi5" name="Да" sourceRef="Gateway_00twnm7" targetRef="Activity_0mhn0w4">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${(response.prop("access").numberValue()) == "1"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0l61ypj" sourceRef="Activity_0mhn0w4" targetRef="Activity_1jgxc9n" />
+    <bpmn:serviceTask id="Activity_0mhn0w4" name="Отправка в лк">
+      <bpmn:documentation>{
+"message": "Заявка одобрена"
+"data": {
+    "tn": [${tn}]
+    "fio": [${fio}]
+}
+}</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request</camunda:inputParameter>
+            <camunda:inputParameter name="payload" />
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1fisqi5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0l61ypj</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0jmr0lp" sourceRef="Activity_1t295ho" targetRef="Event_01xskuy" />
+    <bpmn:userTask id="Activity_1t295ho" name="Test">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="Test2" label="Test2" type="string" defaultValue="${response}" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0thy8kf</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jmr0lp</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Activity_0eh3vcf" name="Отправка в ССД">
+      <bpmn:documentation>https://workflow-7141.iss-reshetnev.ru:8003/ssd
+${response.prop("app_id")}</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">https://workflow-7141.iss-reshetnev.ru:8003/ssd</camunda:inputParameter>
+            <camunda:inputParameter name="payload">{
+  "app_id": "string"
+}</camunda:inputParameter>
+            <camunda:outputParameter name="response">
+              <camunda:script scriptFormat="JavaScript">S(response);</camunda:script>
+            </camunda:outputParameter>
+            <camunda:outputParameter name="statusCode">
+              <camunda:script scriptFormat="JavaScript">statusCode;</camunda:script>
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ea6wnu</bpmn:incoming>
+      <bpmn:outgoing>Flow_14jmklh</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_14jmklh" sourceRef="Activity_0eh3vcf" targetRef="Gateway_00twnm7" />
+    <bpmn:startEvent id="StartEvent_1" name="Получение данных">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="responseData" label="Response Data" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_1ea6wnu</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1ea6wnu" sourceRef="StartEvent_1" targetRef="Activity_0eh3vcf" />
+    <bpmn:userTask id="Activity_1mh87x2" name="Test">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="Test2" label="Test2" type="string" defaultValue="${data}" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+    </bpmn:userTask>
+  </bpmn:process>
+  <bpmn:message id="Message_11r8gcq" name="startProcessMessage" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="PCLKTRY2">
+      <bpmndi:BPMNShape id="Event_01xskuy_di" bpmnElement="Event_01xskuy">
+        <dc:Bounds x="1082" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1084" y="178" width="31" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0zd8yjh_di" bpmnElement="Activity_1jgxc9n">
+        <dc:Bounds x="730" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_15j97w2" bpmnElement="Event_07spxbv">
+        <dc:Bounds x="502" y="442" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="504" y="493" width="31" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_00twnm7_di" bpmnElement="Gateway_00twnm7" isMarkerVisible="true">
+        <dc:Bounds x="495" y="335" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="565" y="350" width="72" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ijs5ma_di" bpmnElement="Activity_0mhn0w4">
+        <dc:Bounds x="560" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0cwgs48_di" bpmnElement="Activity_1t295ho">
+        <dc:Bounds x="910" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1nwsxfq_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="162" y="342" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="153" y="385" width="55" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1om1ldx_di" bpmnElement="Activity_0eh3vcf">
+        <dc:Bounds x="300" y="320" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_08m9msp" bpmnElement="Activity_1mh87x2">
+        <dc:Bounds x="640" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0jmr0lp_di" bpmnElement="Flow_0jmr0lp">
+        <di:waypoint x="1010" y="220" />
+        <di:waypoint x="1082" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0thy8kf_di" bpmnElement="Flow_0thy8kf">
+        <di:waypoint x="830" y="220" />
+        <di:waypoint x="910" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hpolqd_di" bpmnElement="Flow_1hpolqd">
+        <di:waypoint x="520" y="385" />
+        <di:waypoint x="520" y="442" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="525" y="386" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14jmklh_di" bpmnElement="Flow_14jmklh">
+        <di:waypoint x="400" y="360" />
+        <di:waypoint x="495" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fisqi5_di" bpmnElement="Flow_1fisqi5">
+        <di:waypoint x="520" y="335" />
+        <di:waypoint x="520" y="220" />
+        <di:waypoint x="560" y="220" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="533" y="303" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0l61ypj_di" bpmnElement="Flow_0l61ypj">
+        <di:waypoint x="660" y="220" />
+        <di:waypoint x="730" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ea6wnu_di" bpmnElement="Flow_1ea6wnu">
+        <di:waypoint x="198" y="360" />
+        <di:waypoint x="300" y="360" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
