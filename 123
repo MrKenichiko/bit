@@ -1,12 +1,1 @@
-у меня есть переменная
-response, в неё приходят логины в виде:
- ["RuzhilovVE","VarochkinDY","GolubevaGA","BurdukovskayaNN","BasalaevDM"]
-и мне надо этих пользователь записать в:
-var collection = S('{ "collection" : ["System 1", "System 3"] }');
-вместо System 1 и так далее для всех.
-Названия не меняй переменных.
-Камунда моделер, как это сделать?
-МНЕ НАДО ПРОСТО ЗАМЕНИТЬ System 1 и такое на мои логины и ВСЁ. ОСТАЛЬНОЕ ВСЁ РАБОТАЕТ. ПРОСТО КАК МНЕ ТУДА ПОДСТАВИТЬ ЗНАЧЕНИЕ ИЗ response?
-И мне надо так, чтобы collection осталась типом collection. ТО ЕСТЬ НАДО ПРОСТО БЛЯТЬ ВСТАВИТЬ ПЕРЕМЕННЫЕ ВМЕСТО System 1 и остальных, то есть просто вставить переменные из response. 
-В response я забиваю переменные:
-JSON.parse(response);
+The value 'DynamicObject<JSArray>@431cd17d' cannot be passed from one context to another. The current context is 0x42fe4df2 and the argument value originates from context 0x1216b07f.
