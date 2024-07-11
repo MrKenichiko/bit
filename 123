@@ -6,6 +6,7 @@ var collection = S('{ "collection" : ["System 1", "System 3"] }');
 вместо System 1 и так далее для всех.
 Названия не меняй переменных.
 Камунда моделер, как это сделать?
+МНЕ НАДО ПРОСТО ЗАМЕНИТЬ System 1 и такое на мои логины и ВСЁ. ОСТАЛЬНОЕ ВСЁ РАБОТАЕТ. ПРОСТО КАК МНЕ ТУДА ПОДСТАВИТЬ ЗНАЧЕНИЕ ИЗ response?
 Вот полный xml код диаграммы:
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0q7lq6v" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
