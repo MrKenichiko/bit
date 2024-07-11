@@ -1,7 +1,4 @@
 JS
-Вот у меня есть response = ["AntonkinIN","ErshovYM","KokorinaTA","LetunovskiyVV","PapsuevIG","OberemokEY","KarlinDA"](значений может быть и больше, и меньше).
-И вот у меня есть коллекция
-var collection = S('{ "collection" : [] }');
-execution.setVariable("collection", collection);
-Мне надо в пустую коллекцию вставить значения из response, могу я это сделать как-нибудь через ${reponse} или подобное желательо
-Камунда моделер 7.21
+Вот у меня есть response = ["IslentevEV","SamoylenkoIV","BorisovEN","ShirokovaPN","KlimkinOA","SherihovYK","ChulkovGA","NaralchukNV","GulyaevIA","KomkowAW"](значений может быть и больше, и меньше).
+И вот у меня есть коллекция collection = {"collection":["System 1","System 3"]}
+Как мне сделать через цикл, чтобы значения из response передавались в коллекцию и были там? Сейчас там стоит Sytem 1 и System 3, но это просто примеры,которые надо убрать и сделать там переменные из response
