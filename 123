@@ -1,4 +1,7 @@
-JS
-Вот у меня есть response = ["IslentevEV","SamoylenkoIV","BorisovEN","ShirokovaPN","KlimkinOA","SherihovYK","ChulkovGA","NaralchukNV","GulyaevIA","KomkowAW"](значений может быть и больше, и меньше).
-И вот у меня есть коллекция collection = {"collection":["System 1","System 3"]}
-Как мне сделать через цикл, чтобы значения из response передавались в коллекцию и были там? Сейчас там стоит Sytem 1 и System 3, но это просто примеры,которые надо убрать и сделать там переменные из response
+Камунда моделер
+var collection = S('{ "collection" : ["System 1", "System 3"] }');
+execution.setVariable("collection", collection);
+Как мне сюда вставить значения получаемые из response в виде:
+["SemenovaTM","KryukovaOV","AvdievskayaEA","TarasovAA","IevlevLA","BryukhanovDN"]
+Мне надо вставить response вместо значения коллекшн ["System 1", "System 3"], но как?
+МЕНЯТЬ САМУ ПЕРЕМЕННУЮ var collection НЕЛЬЗЯ. ТАМ ВСЁ РАБОЧЕЕ, НУЖНО ПРОСТО ВСТАВИТЬ ЗНАЧЕНИЯ
