@@ -1,7 +1,7 @@
 JS
 Вот у меня есть response = ["AntonkinIN","ErshovYM","KokorinaTA","LetunovskiyVV","PapsuevIG","OberemokEY","KarlinDA"](значений может быть и больше, и меньше).
 И вот у меня есть коллекция
-var collection = S('{ "collection" : ["System 1", "System 3"] }');
+var collection = S('{ "collection" : [] }');
 execution.setVariable("collection", collection);
-Мне надо вместо system 1(это там переменная как пример), вставить туда значения из response, как это сделать?
-collection - это коллекция. СТРУКТУРУ НЕ МЕНЯТЬ И НЕ ПРЕОБРАЗОВОВАТЬ. МНЕ НАДО ПРОСТО ВМЕСТО SYSTEM 1, КОТОРОЕ ТАМ ДЛЯ ПРИМЕРА ЛЕЖИТ, ЧТОБЫ ТАМ БЫЛИ ПЕРЕМЕННЫЕ ИЗ RESPONSE, НЕ БОЛЕЕ ТОГО
+Мне надо в пустую коллекцию вставить значения из response, могу я это сделать как-нибудь через ${reponse} или подобное желательо
+Камунда моделер 7.21
