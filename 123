@@ -1,1 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_04o060i" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="PCLKTRY2" name="PCLKTRY2" isExecutable="true">
+    <bpmn:endEvent id="Event_01xskuy" name="Конец">
+      <bpmn:incoming>Flow_0jmr0lp</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_1jgxc9n" name="Создание заявки в СВТ">
+      <bpmn:documentation>JSON с начала отправляем по ссылке 
+https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request - ссылка для отправки запроса</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="http-connector" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="method" value="POST" />
+          <zeebe:header key="url" value="https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request" />
+          <zeebe:header key="Content-Type" value="application/json" />
+        </zeebe:taskHeaders>
+        <zeebe:input source="=S(JSON.stringify())" target="payload" />
+        <zeebe:output source="statusCode" target="statusCode" />
+        <zeebe:output source="S(response)" target="response" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0l61ypj</bpmn:incoming>
+      <bpmn:outgoing>Flow_0thy8kf</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0thy8kf" sourceRef="Activity_1jgxc9n" targetRef="Activity_1t295ho" />
+    <bpmn:endEvent id="Event_07spxbv" name="Конец">
+      <bpmn:incoming>Flow_1hpolqd</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_00twnm7" name="Согласовано?">
+      <bpmn:incoming>Flow_14jmklh</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hpolqd</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1fisqi5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1hpolqd" name="Нет" sourceRef="Gateway_00twnm7" targetRef="Event_07spxbv">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${(response.prop("access").numberValue()) == "0"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1fisqi5" name="Да" sourceRef="Gateway_00twnm7" targetRef="Activity_0mhn0w4">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${(response.prop("access").numberValue()) == "1"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0l61ypj" sourceRef="Activity_0mhn0w4" targetRef="Activity_1jgxc9n" />
+    <bpmn:serviceTask id="Activity_0mhn0w4" name="Отправка в лк">
+      <bpmn:documentation>{
+"message": "Заявка одобрена"
+"data": {
+    "tn": [${tn}]
+    "fio": [${fio}]
+}
+}</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="http-connector" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="method" value="POST" />
+          <zeebe:header key="url" value="https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request" />
+          <zeebe:header key="Content-Type" value="application/json" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1fisqi5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0l61ypj</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0jmr0lp" sourceRef="Activity_1t295ho" targetRef="Event_01xskuy" />
+    <bpmn:userTask id="Activity_1t295ho" name="Test">
+      <bpmn:extensionElements>
+        <zeebe:taskForm>
+          <zeebe:formField id="Test2" label="Test2" type="string" defaultValue="${response}" />
+        </zeebe:taskForm>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0thy8kf</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jmr0lp</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Activity_0eh3vcf" name="Отправка в ССД">
+      <bpmn:documentation>https://workflow-7141.iss-reshetnev.ru:8003/ssd
+${response.prop("app_id")}</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="http-connector" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="method" value="POST" />
+          <zeebe:header key="url" value="https://workflow-7141.iss-reshetnev.ru:8003/ssd" />
+          <zeebe:header key="Content-Type" value="application/json" />
+        </zeebe:taskHeaders>
+        <zeebe:input source="response.prop('app_id')" target="app_id" />
+        <zeebe:output source="S(response)" target="response" />
+        <zeebe:output source="statusCode" target="statusCode" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ea6wnu</bpmn:incoming>
+      <bpmn:outgoing>Flow_14jmklh</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_14jmklh" sourceRef="Activity_0eh3vcf" targetRef="Gateway_00twnm7" />
+    <bpmn:startEvent id="StartEvent_1" name="Получение данных">
+      <bpmn:extensionElements>
+        <zeebe:taskForm />
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_1ea6wnu</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1ea6wnu" sourceRef="StartEvent_1" targetRef="Activity_0eh3vcf" />
+  </bpmn:process>
+  <bpmn:message id="Message_11r8gcq" name="startProcessMessage" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="PCLKTRY2">
+      <bpmndi:BPMNShape id="Event_01xskuy_di" bpmnElement="Event_01xskuy">
+        <dc:Bounds x="1082" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1084" y="178" width="31" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0zd8yjh_di" bpmnElement="Activity_1jgxc9n">
+        <dc:Bounds x="730" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0thy8kf_di" bpmnElement="Flow_0thy8kf">
+        <di:waypoint xsi:type="dc:Point" x="830" y="220" />
+        <di:waypoint xsi:type="dc:Point" x="920" y="220" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_07spxbv_di" bpmnElement="Event_07spxbv">
+        <dc:Bounds x="1080" y="364" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1088" y="346" width="22" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_00twnm7_di" bpmnElement="Gateway_00twnm7" isMarkerVisible="true">
+        <dc:Bounds x="970" y="314" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="945" y="296" width="101" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1hpolqd_di" bpmnElement="Flow_1hpolqd">
+        <di:waypoint xsi:type="dc:Point" x="995" y="364" />
+        <di:waypoint xsi:type="dc:Point" x="1080" y="364" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1024" y="344" width="12" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fisqi5_di" bpmnElement="Flow_1fisqi5">
+        <di:waypoint xsi:type="dc:Point" x="1020" y="314" />
+        <di:waypoint xsi:type="dc:Point" x="1020" y="270" />
+        <di:waypoint xsi:type="dc:Point" x="830" y="270" />
+        <di:waypoint xsi:type="dc:Point" x="830" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="998" y="274" width="12" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0l61ypj_di" bpmnElement="Flow_0l61ypj">
+        <di:waypoint xsi:type="dc:Point" x="730" y="220" />
+        <di:waypoint xsi:type="dc:Point" x="630" y="220" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0mhn0w4_di" bpmnElement="Activity_0mhn0w4">
+        <dc:Bounds x="530" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0jmr0lp_di" bpmnElement="Flow_0jmr0lp">
+        <di:waypoint xsi:type="dc:Point" x="730" y="220" />
+        <di:waypoint xsi:type="dc:Point" x="790" y="220" />
+        <di:waypoint xsi:type="dc:Point" x="860" y="220" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_1t295ho_di" bpmnElement="Activity_1t295ho">
+        <dc:Bounds x="860" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0eh3vcf_di" bpmnElement="Activity_0eh3vcf">
+        <dc:Bounds x="320" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_14jmklh_di" bpmnElement="Flow_14jmklh">
+        <di:waypoint xsi:type="dc:Point" x="420" y="220" />
+        <di:waypoint xsi:type="dc:Point" x="520" y="220" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1di4ce6_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="184" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="152" y="240" width="100" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1ea6wnu_di" bpmnElement="Flow_1ea6wnu">
+        <di:waypoint xsi:type="dc:Point" x="220" y="220" />
+        <di:waypoint xsi:type="dc:Point" x="320" y="220" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
 
