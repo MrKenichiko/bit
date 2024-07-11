@@ -1,1 +1,8 @@
-The process could not be started. : Cannot instantiate process definition TelegramAPI:19:5d34c5d9-3e9a-11ef-8c9b-00505691b92b: Unable to evaluate script while executing activity 'Activity_00mmsd7' in the process definition with id 'TelegramAPI:19:5d34c5d9-3e9a-11ef-8c9b-00505691b92b':org.graalvm.polyglot.PolyglotException: TypeError: invokeMember (getVariable) on org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity@4db90d2 failed due to: no applicable overload found (overloads: [Method[public java.lang.Object org.camunda.bpm.engine.impl.core.variable.scope.AbstractVariableScope.getVariable(java.lang.String,boolean)], Method[public java.lang.Object org.camunda.bpm.engine.impl.core.variable.scope.AbstractVariableScope.getVariable(java.lang.String)]], arguments: [messages (String), [{"login":"BershNV","text":"Привет"},{"login":"RadostevIV","text":"Привет"},{"login":"SobolevskayaIM","text":"Привет"},{"login":"LipantevaIV","text":"Привет"},{"login":"KayukovVV","text":"Привет"}] (String)])
+у меня есть переменная
+response, в неё приходят логины в виде:
+ ["RuzhilovVE","VarochkinDY","GolubevaGA","BurdukovskayaNN","BasalaevDM"]
+и мне надо этих пользователь записать в:
+var collection = S('{ "collection" : ["System 1", "System 3"] }');
+вместо System 1 и так далее для всех.
+Названия не меняй переменных.
+Камунда моделер, как это сделать?
