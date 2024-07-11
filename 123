@@ -1,1 +1,5 @@
-The value 'DynamicObject<JSArray>@431cd17d' cannot be passed from one context to another. The current context is 0x42fe4df2 and the argument value originates from context 0x1216b07f.
+У меня есть переменная response, которую я получаю после GET запроса
+Она выглядит: ["KonapelkoAA","KovalyovRB","ViklyukYS","AykashevEA","PermyakovaEK"](это логины, их рандомное кол-во).
+Я её получение обрабатываю только как S(response);
+Мне надо, чтобы логины из response записывались сюда вместо сейчас которые там System 1 и так далее(переменные там для примера)
+var collection = S('{ "collection" : ["System 1", "System 3"] }');
