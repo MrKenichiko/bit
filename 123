@@ -1,215 +1,165 @@
-Это камунда 7.21
+Камунда моделер 8.5
+При деплое ошибка
+Command 'CREATE' rejected with code 'INVALID_ARGUMENT': Expected to deploy new resources, but encountered the following errors:
+'8test.bpmn': - Element: Flow_10drx0r > conditionExpression
+    - ERROR: failed to parse expression '(response.prop("access").numberValue()) = "1"': Expected (start-of-input | ifOp | forOp | quantifiedOp | disjunction):1:1, found "(response."
+- Element: Flow_0pvzrsq > conditionExpression
+    - ERROR: failed to parse expression '(response.prop("access").numberValue()) = "0"': Expected (start-of-input | ifOp | forOp | quantifiedOp | disjunction):1:1, found "(response."
+- Element: Activity_1cionvh > extensionElements > ioMapping > input
+    - ERROR: Expected expression but not found.
+ [ deploy-error ]
+Вот диаграмма:
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_04o060i" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
-  <bpmn:process id="PCLKTRY2" name="PCLKTRY2" isExecutable="true" camunda:historyTimeToLive="P7D">
-    <bpmn:endEvent id="Event_01xskuy" name="Конец">
-      <bpmn:incoming>Flow_0jmr0lp</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:serviceTask id="Activity_1jgxc9n" name="Создание заявки в СВТ">
-      <bpmn:documentation>JSON с начала отправляем по ссылке 
-https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request - ссылка для отправки запроса</bpmn:documentation>
-      <bpmn:extensionElements>
-        <camunda:connector>
-          <camunda:inputOutput>
-            <camunda:inputParameter name="method">POST</camunda:inputParameter>
-            <camunda:inputParameter name="headers">
-              <camunda:map>
-                <camunda:entry key="Content-Type">application/json</camunda:entry>
-              </camunda:map>
-            </camunda:inputParameter>
-            <camunda:inputParameter name="url">https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request</camunda:inputParameter>
-            <camunda:inputParameter name="payload">
-              ${S(JSON.stringify())}
-              </camunda:inputParameter>
-            <camunda:outputParameter name="statusCode">
-              <camunda:script scriptFormat="JavaScript">statusCode;</camunda:script>
-            </camunda:outputParameter>
-            <camunda:outputParameter name="response">
-              <camunda:script scriptFormat="JavaScript">S(response);</camunda:script>
-            </camunda:outputParameter>
-          </camunda:inputOutput>
-          <camunda:connectorId>http-connector</camunda:connectorId>
-        </camunda:connector>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0l61ypj</bpmn:incoming>
-      <bpmn:outgoing>Flow_0thy8kf</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_0thy8kf" sourceRef="Activity_1jgxc9n" targetRef="Activity_1t295ho" />
-    <bpmn:endEvent id="Event_07spxbv" name="Конец">
-      <bpmn:incoming>Flow_1hpolqd</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:exclusiveGateway id="Gateway_00twnm7" name="Согласовано?">
-      <bpmn:incoming>Flow_14jmklh</bpmn:incoming>
-      <bpmn:outgoing>Flow_1hpolqd</bpmn:outgoing>
-      <bpmn:outgoing>Flow_1fisqi5</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_1hpolqd" name="Нет" sourceRef="Gateway_00twnm7" targetRef="Event_07spxbv">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${(response.prop("access").numberValue()) == "0"}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1fisqi5" name="Да" sourceRef="Gateway_00twnm7" targetRef="Activity_0mhn0w4">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${(response.prop("access").numberValue()) == "1"}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0l61ypj" sourceRef="Activity_0mhn0w4" targetRef="Activity_1jgxc9n" />
-    <bpmn:serviceTask id="Activity_0mhn0w4" name="Отправка в лк">
-      <bpmn:documentation>{
-"message": "Заявка одобрена"
-"data": {
-    "tn": [${tn}]
-    "fio": [${fio}]
-}
-}</bpmn:documentation>
-      <bpmn:extensionElements>
-        <camunda:connector>
-          <camunda:inputOutput>
-            <camunda:inputParameter name="method">POST</camunda:inputParameter>
-            <camunda:inputParameter name="headers">
-              <camunda:map>
-                <camunda:entry key="Content-Type">application/json</camunda:entry>
-              </camunda:map>
-            </camunda:inputParameter>
-            <camunda:inputParameter name="url">https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request</camunda:inputParameter>
-            <camunda:inputParameter name="payload" />
-          </camunda:inputOutput>
-          <camunda:connectorId>http-connector</camunda:connectorId>
-        </camunda:connector>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1fisqi5</bpmn:incoming>
-      <bpmn:outgoing>Flow_0l61ypj</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_0jmr0lp" sourceRef="Activity_1t295ho" targetRef="Event_01xskuy" />
-    <bpmn:userTask id="Activity_1t295ho" name="Test">
-      <bpmn:extensionElements>
-        <camunda:formData>
-          <camunda:formField id="Test2" label="Test2" type="string" defaultValue="${response}" />
-        </camunda:formData>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0thy8kf</bpmn:incoming>
-      <bpmn:outgoing>Flow_0jmr0lp</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:serviceTask id="Activity_0eh3vcf" name="Отправка в ССД">
-      <bpmn:documentation>https://workflow-7141.iss-reshetnev.ru:8003/ssd
-${response.prop("app_id")}</bpmn:documentation>
-      <bpmn:extensionElements>
-        <camunda:connector>
-          <camunda:inputOutput>
-            <camunda:inputParameter name="method">POST</camunda:inputParameter>
-            <camunda:inputParameter name="headers">
-              <camunda:map>
-                <camunda:entry key="Content-Type">application/json</camunda:entry>
-              </camunda:map>
-            </camunda:inputParameter>
-            <camunda:inputParameter name="url">https://workflow-7141.iss-reshetnev.ru:8003/ssd</camunda:inputParameter>
-            <camunda:inputParameter name="payload">{
-  "app_id": "string"
-}</camunda:inputParameter>
-            <camunda:outputParameter name="response">
-              <camunda:script scriptFormat="JavaScript">S(response);</camunda:script>
-            </camunda:outputParameter>
-            <camunda:outputParameter name="statusCode">
-              <camunda:script scriptFormat="JavaScript">statusCode;</camunda:script>
-            </camunda:outputParameter>
-          </camunda:inputOutput>
-          <camunda:connectorId>http-connector</camunda:connectorId>
-        </camunda:connector>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1ea6wnu</bpmn:incoming>
-      <bpmn:outgoing>Flow_14jmklh</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_14jmklh" sourceRef="Activity_0eh3vcf" targetRef="Gateway_00twnm7" />
-    <bpmn:startEvent id="StartEvent_1" name="Получение данных">
-      <bpmn:extensionElements>
-        <camunda:formData />
-      </bpmn:extensionElements>
-      <bpmn:outgoing>Flow_1ea6wnu</bpmn:outgoing>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1m6ym78" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.5.0">
+  <bpmn:process id="test" name="Test" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Начало">
+      <bpmn:outgoing>Flow_0hg587h</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_1ea6wnu" sourceRef="StartEvent_1" targetRef="Activity_0eh3vcf" />
-    <bpmn:userTask id="Activity_1mh87x2" name="Test">
+    <bpmn:serviceTask id="Activity_0bicrju" name="Отправка в ссд">
       <bpmn:extensionElements>
-        <camunda:formData>
-          <camunda:formField id="Test2" label="Test2" type="string" defaultValue="${data}" />
-        </camunda:formData>
+        <zeebe:taskDefinition type="http" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="method" value="POST" />
+          <zeebe:header key="url" value="https://workflow-7141.iss-reshetnev.ru:8003/ssd" />
+          <zeebe:header key="Content-Type" value="application/json" />
+        </zeebe:taskHeaders>
+        <zeebe:ioMapping>
+          <zeebe:input source="={&#34;app_id&#34;: string}" target="source" />
+          <zeebe:input source="=payload" target="target" />
+          <zeebe:output source="=statusCode" target="source" />
+          <zeebe:output source="=statusCode" target="target" />
+          <zeebe:output source="=response" target="source" />
+          <zeebe:output source="=response" target="target" />
+        </zeebe:ioMapping>
       </bpmn:extensionElements>
-    </bpmn:userTask>
+      <bpmn:incoming>Flow_0hg587h</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pdvn77</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_14yvfew">
+      <bpmn:incoming>Flow_0pdvn77</bpmn:incoming>
+      <bpmn:outgoing>Flow_10drx0r</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0pvzrsq</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="Event_06bzw80" name="Конец">
+      <bpmn:incoming>Flow_0pvzrsq</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Event_0z71jmi" name="Конец">
+      <bpmn:incoming>Flow_07bwq56</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_10drx0r" name="Да" sourceRef="Gateway_14yvfew" targetRef="Activity_1cionvh">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=(response.prop("access").numberValue()) = "1"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0pvzrsq" name="Нет" sourceRef="Gateway_14yvfew" targetRef="Event_06bzw80">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=(response.prop("access").numberValue()) = "0"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0pdvn77" sourceRef="Activity_0bicrju" targetRef="Gateway_14yvfew" />
+    <bpmn:sequenceFlow id="Flow_0hg587h" sourceRef="StartEvent_1" targetRef="Activity_0bicrju" />
+    <bpmn:sequenceFlow id="Flow_07bwq56" sourceRef="Activity_11aoy9c" targetRef="Event_0z71jmi" />
+    <bpmn:serviceTask id="Activity_11aoy9c" name="Создание заявки в СВТ">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="http" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="method" value="POST" />
+          <zeebe:header key="url" value="https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request" />
+          <zeebe:header key="Content-Type" value="application/json" />
+        </zeebe:taskHeaders>
+        <zeebe:ioMapping>
+          <zeebe:input source="=S(JSON.stringify())" target="source" />
+          <zeebe:input source="=payload" target="target" />
+          <zeebe:output source="=statusCode" target="source" />
+          <zeebe:output source="=statusCode" target="target" />
+          <zeebe:output source="=response" target="source" />
+          <zeebe:output source="=response" target="response" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_11hb4fq</bpmn:incoming>
+      <bpmn:outgoing>Flow_07bwq56</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_1cionvh" name="Отправка в лк">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="http" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="method" value="POST" />
+          <zeebe:header key="url" value="https://staging-svt.iss-reshetnev.ru/api/v3/warehouse/requests/new_request" />
+          <zeebe:header key="Content-Type" value="application/json" />
+        </zeebe:taskHeaders>
+        <zeebe:ioMapping>
+          <zeebe:input target="source" />
+          <zeebe:input source="=payload" target="target" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_10drx0r</bpmn:incoming>
+      <bpmn:outgoing>Flow_11hb4fq</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_11hb4fq" sourceRef="Activity_1cionvh" targetRef="Activity_11aoy9c" />
   </bpmn:process>
-  <bpmn:message id="Message_11r8gcq" name="startProcessMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="PCLKTRY2">
-      <bpmndi:BPMNShape id="Event_01xskuy_di" bpmnElement="Event_01xskuy">
-        <dc:Bounds x="1082" y="202" width="36" height="36" />
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="test">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="142" y="242" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1084" y="178" width="31" height="14" />
+          <dc:Bounds x="142" y="285" width="37" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0zd8yjh_di" bpmnElement="Activity_1jgxc9n">
-        <dc:Bounds x="730" y="180" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_0gq9rdh_di" bpmnElement="Activity_0bicrju">
+        <dc:Bounds x="250" y="220" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_15j97w2" bpmnElement="Event_07spxbv">
-        <dc:Bounds x="502" y="442" width="36" height="36" />
+      <bpmndi:BPMNShape id="Gateway_14yvfew_di" bpmnElement="Gateway_14yvfew" isMarkerVisible="true">
+        <dc:Bounds x="435" y="235" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="504" y="493" width="31" height="14" />
+          <dc:Bounds x="634" y="183" width="72" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_00twnm7_di" bpmnElement="Gateway_00twnm7" isMarkerVisible="true">
-        <dc:Bounds x="495" y="335" width="50" height="50" />
+      <bpmndi:BPMNShape id="Event_06bzw80_di" bpmnElement="Event_06bzw80">
+        <dc:Bounds x="442" y="372" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="565" y="350" width="72" height="14" />
+          <dc:Bounds x="445" y="415" width="31" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0ijs5ma_di" bpmnElement="Activity_0mhn0w4">
-        <dc:Bounds x="560" y="180" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0cwgs48_di" bpmnElement="Activity_1t295ho">
-        <dc:Bounds x="910" y="180" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1nwsxfq_di" bpmnElement="StartEvent_1">
-        <dc:Bounds x="162" y="342" width="36" height="36" />
+      <bpmndi:BPMNShape id="Event_0z71jmi_di" bpmnElement="Event_0z71jmi">
+        <dc:Bounds x="1042" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="153" y="385" width="55" height="27" />
+          <dc:Bounds x="1045" y="145" width="31" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1om1ldx_di" bpmnElement="Activity_0eh3vcf">
-        <dc:Bounds x="300" y="320" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_13xb92h_di" bpmnElement="Activity_11aoy9c">
+        <dc:Bounds x="800" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_08m9msp" bpmnElement="Activity_1mh87x2">
-        <dc:Bounds x="640" y="80" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_0wan7lp" bpmnElement="Activity_1cionvh">
+        <dc:Bounds x="550" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_0jmr0lp_di" bpmnElement="Flow_0jmr0lp">
-        <di:waypoint x="1010" y="220" />
-        <di:waypoint x="1082" y="220" />
+      <bpmndi:BPMNEdge id="Flow_0hg587h_di" bpmnElement="Flow_0hg587h">
+        <di:waypoint x="178" y="260" />
+        <di:waypoint x="250" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0thy8kf_di" bpmnElement="Flow_0thy8kf">
-        <di:waypoint x="830" y="220" />
-        <di:waypoint x="910" y="220" />
+      <bpmndi:BPMNEdge id="Flow_0pdvn77_di" bpmnElement="Flow_0pdvn77">
+        <di:waypoint x="350" y="260" />
+        <di:waypoint x="435" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1hpolqd_di" bpmnElement="Flow_1hpolqd">
-        <di:waypoint x="520" y="385" />
-        <di:waypoint x="520" y="442" />
+      <bpmndi:BPMNEdge id="Flow_10drx0r_di" bpmnElement="Flow_10drx0r">
+        <di:waypoint x="460" y="235" />
+        <di:waypoint x="460" y="120" />
+        <di:waypoint x="550" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="525" y="386" width="19" height="14" />
+          <dc:Bounds x="469" y="223" width="14" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14jmklh_di" bpmnElement="Flow_14jmklh">
-        <di:waypoint x="400" y="360" />
-        <di:waypoint x="495" y="360" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1fisqi5_di" bpmnElement="Flow_1fisqi5">
-        <di:waypoint x="520" y="335" />
-        <di:waypoint x="520" y="220" />
-        <di:waypoint x="560" y="220" />
+      <bpmndi:BPMNEdge id="Flow_0pvzrsq_di" bpmnElement="Flow_0pvzrsq">
+        <di:waypoint x="460" y="285" />
+        <di:waypoint x="460" y="372" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="533" y="303" width="14" height="14" />
+          <dc:Bounds x="466" y="285" width="19" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0l61ypj_di" bpmnElement="Flow_0l61ypj">
-        <di:waypoint x="660" y="220" />
-        <di:waypoint x="730" y="220" />
+      <bpmndi:BPMNEdge id="Flow_07bwq56_di" bpmnElement="Flow_07bwq56">
+        <di:waypoint x="900" y="120" />
+        <di:waypoint x="1042" y="120" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1ea6wnu_di" bpmnElement="Flow_1ea6wnu">
-        <di:waypoint x="198" y="360" />
-        <di:waypoint x="300" y="360" />
+      <bpmndi:BPMNEdge id="Flow_11hb4fq_di" bpmnElement="Flow_11hb4fq">
+        <di:waypoint x="650" y="120" />
+        <di:waypoint x="800" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
-Как мне сделать такую же схему, но в камунда 8.5?
-Работаю в камунда моделер
