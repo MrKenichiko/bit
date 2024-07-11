@@ -4,3 +4,4 @@ JS
 var collection = S('{ "collection" : ["System 1", "System 3"] }');
 execution.setVariable("collection", collection);
 Мне надо вместо system 1(это там переменная как пример), вставить туда значения из response, как это сделать?
+collection - это коллекция. СТРУКТУРУ НЕ МЕНЯТЬ И НЕ ПРЕОБРАЗОВОВАТЬ. МНЕ НАДО ПРОСТО ВМЕСТО SYSTEM 1, КОТОРОЕ ТАМ ДЛЯ ПРИМЕРА ЛЕЖИТ, ЧТОБЫ ТАМ БЫЛИ ПЕРЕМЕННЫЕ ИЗ RESPONSE, НЕ БОЛЕЕ ТОГО
